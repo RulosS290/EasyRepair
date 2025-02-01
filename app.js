@@ -1,23 +1,24 @@
 const express = require('express');
 const notFoundMiddleware = require("./middlewares/notFoundMiddleware");
-const errorMiddleware = require("./middlewares/errorMiddleware");
+const errorMiddleware = require("./middlewares/errorMiddleware"); 
+const controllers = require('./controllers/controllers'); 
+
 const app = express();
 const PORT = 5555;
 
-app.get("/endpoint", (req, res) => {
-    res.send("Endpoint prueba sprint 1");
-});
+// Endpoint route
+app.get("/endpoint", controllers.endpointHandler);
 
-app.get('/forzar-error', (req, res) => {
-    throw new Error('Error simulado');
-});
+// forzar-error route
+app.get("/forzar-error", controllers.forzarError);
 
-// 404 error middleware for non-existent routes.
+// Middleware para manejar rutas no encontradas (404)
 app.use(notFoundMiddleware);
 
-// Middleware to handle internal errors (500)
+// Middleware para manejar errores internos (500)
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {
     console.log("Server listening on port", PORT);
 });
+
