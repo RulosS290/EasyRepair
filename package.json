@@ -1,0 +1,26 @@
+{
+  "name": "easyrepair",
+  "version": "1.0.0",
+  "description": "*  [Daniel Santiago Torres Acosta](https://github.com/RulosS290)\r *  [Diego Fernando Castellanos Amaya](https://github.com/Diegoc04)\r *  [Julian David Triana Roa](https://github.com/juliandtrianar)",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RulosS290/EasyRepair.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RulosS290/EasyRepair/issues"
+  },
+  "homepage": "https://github.com/RulosS290/EasyRepair#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
