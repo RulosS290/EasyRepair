@@ -1,6 +1,6 @@
 const express = require('express');
 const loginRoutes = require('./routes/loginRoutes'); 
-const controllers = require('./controllers/controllers'); 
+const controllers = require('./controllers/controllersUsers'); 
 const notFoundMiddleware = require("./middlewares/notFoundMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 

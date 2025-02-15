@@ -1,5 +1,5 @@
 const path = require('path');
-const connection = require('../config/db'); // Importamos la conexión
+const connection = require('../config/db'); 
 
 // Show the login form
 const showLoginPage = (req, res) => {
