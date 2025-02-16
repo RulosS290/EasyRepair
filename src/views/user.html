@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del Usuario</title>
+</head>
+<body>
+    <h2>Información del Usuario</h2>
+    <div id="userInfo"></div>
+    <h3>Token de sesión</h3>
+    <textarea id="tokenDisplay" readonly rows="4" cols="50"></textarea>
+    <br>
+    <button onclick="logout()">Cerrar Sesión</button>
+
+    <script>
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('No estás autenticado, redirigiendo a login...');
+            window.location.href = '/login';
+        } else {
+            document.getElementById('tokenDisplay').textContent = token;
+
+            fetch('/api/users', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    window.location.href = '/login';
+                } else {
+                    document.getElementById('userInfo').innerHTML = `
+                        <p><strong>ID:</strong> ${data.id}</p>
+                        <p><strong>Usuario:</strong> ${data.username}</p>
+                        <p><strong>Tipo:</strong> ${data.type}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al obtener la información del usuario.');
+                window.location.href = '/login';
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>
