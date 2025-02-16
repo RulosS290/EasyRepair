@@ -1,24 +1,25 @@
 const express = require('express');
+const loginRoutes = require('./routes/loginRoutes'); 
+const controllers = require('./controllers/controllersUsers'); 
 const notFoundMiddleware = require("./middlewares/notFoundMiddleware");
-const errorMiddleware = require("./middlewares/errorMiddleware"); 
-const controllers = require('./controllers/controllers'); 
-
+const errorMiddleware = require("./middlewares/errorMiddleware");
+const appointmentRoutes = require('./routes/appointmentRoutes');
 const app = express();
 const PORT = 5555;
 
-// Endpoint route
-app.get("/endpoint", controllers.endpointHandler);
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// forzar-error route
+// Routes
+app.use(loginRoutes);
+app.use(appointmentRoutes);
+app.get("/endpoint", controllers.endpointHandler);
 app.get("/forzar-error", controllers.forzarError);
 
-// Middleware para manejar rutas no encontradas (404)
+// Error handling middlewares
 app.use(notFoundMiddleware);
-
-// Middleware para manejar errores internos (500)
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {
-    console.log("Server listening on port", PORT);
+    console.log(`Server listening on port ${PORT}`);
 });
-
