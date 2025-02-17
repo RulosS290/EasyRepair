@@ -33,9 +33,7 @@
             const data = await response.json();
 
             if (response.ok) {
-                // Guardar token en localStorage
                 localStorage.setItem('token', data.token);
-                // Redirigir a /user
                 window.location.href = '/user';
             } else {
                 alert(data.error);

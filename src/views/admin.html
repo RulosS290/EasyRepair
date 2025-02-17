@@ -46,7 +46,6 @@
             </tr>
         </thead>
         <tbody id="userTable">
-            <!-- Los datos se llenarán dinámicamente -->
         </tbody>
     </table>
 
@@ -110,7 +109,7 @@
                 .then(response => {
                     if (response.status === 200) {
                         alert("Usuario eliminado correctamente.");
-                        location.reload(); // Recargar la página para actualizar la tabla
+                        location.reload();
                     } else {
                         alert("Error al eliminar el usuario.");
                     }
