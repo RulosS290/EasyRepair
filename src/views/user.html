@@ -4,14 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Información del Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #adminBtn {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #adminBtn:hover {
+            background-color: darkblue;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            cursor: pointer;
+            background-color: red;
+            color: white;
+            border: none;
+        }
+    </style>
 </head>
 <body>
     <h2>Información del Usuario</h2>
     <div id="userInfo"></div>
+    
     <h3>Token de sesión</h3>
     <textarea id="tokenDisplay" readonly rows="4" cols="50"></textarea>
     <br>
+
     <button onclick="logout()">Cerrar Sesión</button>
+    <button id="adminBtn" onclick="goToAdmin()">Administrar Usuarios</button>
 
     <script>
         const token = localStorage.getItem('token');
@@ -37,6 +66,11 @@
                         <p><strong>Usuario:</strong> ${data.username}</p>
                         <p><strong>Tipo:</strong> ${data.type}</p>
                     `;
+
+                    // Si el usuario es admin, mostrar botón de administrar
+                    if (data.type.toLowerCase() === 'admin') {
+                        document.getElementById('adminBtn').style.display = 'block';
+                    }
                 }
             })
             .catch(error => {
@@ -49,6 +83,10 @@
         function logout() {
             localStorage.removeItem('token');
             window.location.href = '/login';
+        }
+
+        function goToAdmin() {
+            window.location.href = '/admin';
         }
     </script>
 </body>
