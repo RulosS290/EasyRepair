@@ -15,6 +15,7 @@
         <input type="password" id="password" name="password" required>
         <br><br>
         <button type="submit">Ingresar</button>
+        <button onclick="goToRegister()">Registrarse</button>
     </form>
 
     <script>
@@ -39,6 +40,10 @@
                 alert(data.error);
             }
         });
+
+        function goToRegister() {
+            window.location.href = '/register';
+        }
     </script>
 </body>
 </html>

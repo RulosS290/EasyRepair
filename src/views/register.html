@@ -24,7 +24,8 @@
             </select>
         </div>
         <div>
-            <button type="submit">Registrar</button>
+            <button type="submit">Registrarse</button>
+            <button onclick="goToLogin()">Login</button>
         </div>
     </form>
 
@@ -64,6 +65,10 @@
                 console.error(error);
             }
         });
+
+        function goToLogin() {
+            window.location.href = '/login';
+        }
     </script>
 </body>
 </html>
