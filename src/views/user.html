@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Información del Usuario</title>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 </head>
 <body>
     <h2>Información del Usuario</h2>
@@ -13,42 +14,57 @@
     <br>
     <button onclick="logout()">Cerrar Sesión</button>
 
+    <!-- El botón "Agendar Citas" solo aparece si el usuario es normal -->
+    <button id="appointmentsButton" onclick="goToAppointments()">Agendar Citas</button>
+
+    <div id="techOptions" style="display: none;">
+        <!-- Este div solo se muestra si el usuario es técnico -->
+        <button onclick="goToSchedule()">Ver Horario</button>
+    </div>
+
     <script>
         const token = localStorage.getItem('token');
 
         if (!token) {
             alert('No estás autenticado, redirigiendo a login...');
-            window.location.href = '/login';
+            window.location.href = '/login.html'; // Redirigir a login si no hay token
         } else {
             document.getElementById('tokenDisplay').textContent = token;
 
-            fetch('/api/users', {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    window.location.href = '/login';
-                } else {
-                    document.getElementById('userInfo').innerHTML = `
-                        <p><strong>ID:</strong> ${data.id}</p>
-                        <p><strong>Usuario:</strong> ${data.username}</p>
-                        <p><strong>Tipo:</strong> ${data.type}</p>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al obtener la información del usuario.');
-                window.location.href = '/login';
-            });
+            const decodedToken = jwt_decode(token);
+            const userType = decodedToken.type;
+
+            // Mostrar información del usuario
+            document.getElementById('userInfo').innerHTML = `
+                <p><strong>ID:</strong> ${decodedToken.id}</p>
+                <p><strong>Usuario:</strong> ${decodedToken.username}</p>
+                <p><strong>Tipo:</strong> ${userType}</p>
+            `;
+
+            // Mostrar contenido específico dependiendo del tipo de usuario
+            if (userType === 'user') {
+                // Mostrar opciones para usuario
+                document.getElementById('appointmentsButton').style.display = 'block'; // Mostrar "Agendar Citas"
+            } else if (userType === 'technical') {
+                // Mostrar opciones para técnico
+                document.getElementById('techOptions').style.display = 'block'; // Mostrar "Ver Horario"
+                document.getElementById('appointmentsButton').style.display = 'none'; // Ocultar "Agendar Citas"
+            } else {
+                alert('Tipo de usuario no reconocido');
+            }
         }
 
         function logout() {
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            window.location.href = '/login.html'; // Redirigir a login
+        }
+
+        function goToAppointments() {
+            window.location.href = '/appointments'; // Redirigir al path de citas
+        }
+
+        function goToSchedule() {
+            window.location.href = '/'; // Redirigir al path donde se ve el horario del técnico
         }
     </script>
 </body>
