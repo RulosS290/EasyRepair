@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            cursor: pointer;
+            background-color: red;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Panel de Administración</h1>
+    <button onclick="logout()">Cerrar Sesión</button>
+    <button onclick="back()">Volver</button>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Tipo</th>
+                <th>Accion</th>
+            </tr>
+        </thead>
+        <tbody id="userTable">
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("token");
+    
+            if (!token) {
+                alert("No tienes acceso, inicia sesión.");
+                window.location.href = "/login";
+                return;
+            }
+    
+            fetch("/api/admin/profiles", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (response.status === 403) {
+                    alert("Acceso denegado, no eres administrador.");
+                    window.location.href = "/user";
+                    return;
+                }
+                return response.json();
+            })
+            .then(users => {
+                if (!users) return;
+                const tableBody = document.getElementById("userTable");
+                tableBody.innerHTML = "";
+                users.forEach(user => {
+                    const row = `<tr>
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.type}</td>
+                        <td><button onclick="deleteUser(${user.id})">Eliminar</button></td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error("Error al obtener usuarios:", error));
+        });
+    
+        function deleteUser(userId) {
+            const token = localStorage.getItem("token");
+    
+            if (!token) {
+                alert("No tienes acceso, inicia sesión.");
+                window.location.href = "/login";
+                return;
+            }
+    
+            if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
+                fetch(`/api/admin/profiles/${userId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        alert("Usuario eliminado correctamente.");
+                        location.reload();
+                    } else {
+                        alert("Error al eliminar el usuario.");
+                    }
+                })
+                .catch(error => console.error("Error al eliminar usuario:", error));
+            }
+        }
+
+        function back() {
+            window.location.href = "/user";
+        }
+    
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+    </script>
+    
+</body>
+</html>

@@ -5,14 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Información del Usuario</title>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #adminBtn {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #adminBtn:hover {
+            background-color: darkblue;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            cursor: pointer;
+            background-color: red;
+            color: white;
+            border: none;
+        }
+    </style>
 </head>
 <body>
     <h2>Información del Usuario</h2>
     <div id="userInfo"></div>
+    
     <h3>Token de sesión</h3>
     <textarea id="tokenDisplay" readonly rows="4" cols="50"></textarea>
     <br>
+
     <button onclick="logout()">Cerrar Sesión</button>
+    <button id="adminBtn" onclick="goToAdmin()">Administrar Usuarios</button>
 
   
     <div id="userOptions" style="display: none;">
@@ -33,7 +62,6 @@
             window.location.href = '/login'; 
         } else {
             document.getElementById('tokenDisplay').textContent = token;
-
             const decodedToken = jwt_decode(token);
             const userType = decodedToken.type;
 
@@ -50,6 +78,32 @@
             } else {
                 alert('Tipo de usuario no reconocido');
             }
+            fetch('/api/users', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    window.location.href = '/login';
+                } else {
+                    document.getElementById('userInfo').innerHTML = `
+                        <p><strong>ID:</strong> ${data.id}</p>
+                        <p><strong>Usuario:</strong> ${data.username}</p>
+                        <p><strong>Tipo:</strong> ${data.type}</p>
+                    `;
+
+                    if (data.type.toLowerCase() === 'admin') {
+                        document.getElementById('adminBtn').style.display = 'block';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al obtener la información del usuario.');
+                window.location.href = '/login';
+            });
         }
 
         function logout() {
@@ -65,6 +119,9 @@
             window.location.href = '/user/schedule';
         }
 
+        function goToAdmin() {
+            window.location.href = '/admin';
+        }
     </script>
 </body>
 </html>
