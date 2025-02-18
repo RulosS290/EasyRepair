@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cita</title>
+</head>
+<body>
+    <h2>Crear Cita</h2>
+    <form id="appointmentForm">
+        <label for="technician">Seleccionar Técnico:</label>
+        <select id="technician" name="technician" required>
+            <!-- Los técnicos serán cargados dinámicamente aquí -->
+        </select>
+        <br><br>
+        
+        <label for="device">Dispositivo:</label>
+        <input type="text" id="device" name="device" required>
+        <br><br>
+
+        <label for="datetime">Fecha y Hora:</label>
+        <input type="datetime-local" id="datetime" name="datetime" required>
+        <br><br>
+
+        <button type="submit">Crear Cita</button>
+    </form>
+
+    <script>
+        const loadTechnicians = async () => {
+            try {
+                const response = await fetch('/api/appointmentsGetTechnicians', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                    }
+                });
+
+                const technicians = await response.json();
+
+                if (technicians.error) {
+                    console.error('Error al obtener técnicos:', technicians.error);
+                    alert(technicians.error);  
+                    return;
+                }
+
+                if (Array.isArray(technicians)) {
+                    const technicianSelect = document.getElementById('technician');
+                    technicians.forEach(technician => {
+                        const option = document.createElement('option');
+                        option.value = technician.id; 
+                        option.textContent = `ID: ${technician.id} - ${technician.username}`; 
+                        technicianSelect.appendChild(option);
+                    });
+                } else {
+                    console.error('Respuesta inesperada:', technicians);
+                    alert('No se pudo cargar la lista de técnicos correctamente.');
+                }
+            } catch (error) {
+                console.error('Error al cargar los técnicos:', error);
+                alert('No se pudo cargar la lista de técnicos.');
+            }
+        };
+
+        window.onload = loadTechnicians;
+        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+        
+            let technicianId = document.getElementById('technician').value;
+            const device = document.getElementById('device').value;
+            const datetime = document.getElementById('datetime').value;
+        
+            technicianId = parseInt(technicianId, 10);
+            if (isNaN(technicianId)) {
+                alert('El ID del técnico debe ser un número válido.');
+                return;
+            }
+        
+            const token = localStorage.getItem('token');
+    
+            const response = await fetch('/api/appointments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    technicianId,
+                    datetime,
+                    device
+                })
+            });
+        
+            const data = await response.json();
+        
+            if (response.ok) {
+                alert('Cita creada con éxito.');
+                window.location.href = '/appointments';  
+            } else {
+                alert(data.error || 'Error al crear la cita');
+            }
+        });        
+    </script>
+</body>
+</html>
+

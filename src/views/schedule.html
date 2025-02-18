@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Citas</title>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+</head>
+<body>
+    <h2>Mis Citas</h2>
+    <div id="appointmentsContainer">
+        <p>Cargando citas...</p>
+    </div>
+
+    <br>
+    <button onclick="goBack()">Volver</button>
+
+    <script>
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('No estás autenticado, redirigiendo a login...');
+            window.location.href = '/login';
+        } else {
+            
+            const decodedToken = jwt_decode(token);
+            const userId = decodedToken.id; 
+
+            fetch(`/api/user/schedule`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('No hay citas programadas.');
+                    } else {
+                        throw new Error('Error al obtener las citas.');
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                const appointments = data.appointments || []; 
+                const container = document.getElementById('appointmentsContainer');
+                container.innerHTML = '';
+
+                if (appointments.length === 0) {
+                    container.innerHTML = '<p>No tienes citas programadas.</p>';
+                    return;
+                }
+
+                const table = document.createElement('table');
+                table.border = '1';
+                table.innerHTML = `
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Dispositivo</th>
+                        <th>Usuario</th>
+                    </tr>
+                `;
+
+                appointments.forEach(app => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(app.datetime).toLocaleDateString()}</td>
+                        <td>${new Date(app.datetime).toLocaleTimeString()}</td>
+                        <td>${app.device}</td>
+                        <td>${app.related_user_name}</td>
+                    `;
+                    table.appendChild(row);
+                });
+
+                container.appendChild(table);
+            })
+            .catch(error => {
+                console.error('Error:', error.message);
+                document.getElementById('appointmentsContainer').innerHTML = `<p>${error.message}</p>`;
+            });
+
+        }
+
+        function goBack() {
+            window.location.href = '/user';
+        }
+    </script>
+</body>
+</html>
