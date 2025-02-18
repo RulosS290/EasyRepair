@@ -14,12 +14,15 @@
     <br>
     <button onclick="logout()">Cerrar Sesión</button>
 
-    <!-- El botón "Agendar Citas" solo aparece si el usuario es normal -->
-    <button id="appointmentsButton" onclick="goToAppointments()">Agendar Citas</button>
+    <!-- Botones para usuario normal -->
+    <div id="userOptions" style="display: none;">
+        <button onclick="goToAppointments()">Agendar Citas</button>
+        <button onclick="goToUserSchedule()">Ver Citas</button>
+    </div>
 
+    <!-- Botón para técnicos -->
     <div id="techOptions" style="display: none;">
-        <!-- Este div solo se muestra si el usuario es técnico -->
-        <button onclick="goToSchedule()">Ver Horario</button>
+        <button onclick="goToUserSchedule()">Ver Horario</button>
     </div>
 
     <script>
@@ -27,7 +30,7 @@
 
         if (!token) {
             alert('No estás autenticado, redirigiendo a login...');
-            window.location.href = '/login.html'; // Redirigir a login si no hay token
+            window.location.href = '/login'; // Redirigir a login si no hay token
         } else {
             document.getElementById('tokenDisplay').textContent = token;
 
@@ -43,12 +46,9 @@
 
             // Mostrar contenido específico dependiendo del tipo de usuario
             if (userType === 'user') {
-                // Mostrar opciones para usuario
-                document.getElementById('appointmentsButton').style.display = 'block'; // Mostrar "Agendar Citas"
+                document.getElementById('userOptions').style.display = 'block';
             } else if (userType === 'technical') {
-                // Mostrar opciones para técnico
-                document.getElementById('techOptions').style.display = 'block'; // Mostrar "Ver Horario"
-                document.getElementById('appointmentsButton').style.display = 'none'; // Ocultar "Agendar Citas"
+                document.getElementById('techOptions').style.display = 'block';
             } else {
                 alert('Tipo de usuario no reconocido');
             }
@@ -56,16 +56,17 @@
 
         function logout() {
             localStorage.removeItem('token');
-            window.location.href = '/login.html'; // Redirigir a login
+            window.location.href = '/login'; // Redirigir a login
         }
 
         function goToAppointments() {
-            window.location.href = '/appointments'; // Redirigir al path de citas
+            window.location.href = '/appointments'; // Redirigir al path de agendar citas
         }
 
-        function goToSchedule() {
-            window.location.href = '/'; // Redirigir al path donde se ve el horario del técnico
+        function goToUserSchedule() {
+            window.location.href = '/user/schedule'; // Redirigir a la agenda de citas del usuario
         }
+
     </script>
 </body>
 </html>
