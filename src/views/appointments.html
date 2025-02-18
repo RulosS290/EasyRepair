@@ -26,31 +26,28 @@
     </form>
 
     <script>
-        // Función para obtener la lista de técnicos desde el servidor
         const loadTechnicians = async () => {
             try {
                 const response = await fetch('/api/appointmentsGetTechnicians', {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Asegurándote de enviar el token
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` 
                     }
                 });
 
                 const technicians = await response.json();
 
-                // Verificar si la respuesta contiene un error
                 if (technicians.error) {
                     console.error('Error al obtener técnicos:', technicians.error);
-                    alert(technicians.error);  // Mostrar el error en la interfaz
+                    alert(technicians.error);  
                     return;
                 }
 
-                // Verificar que la respuesta es un arreglo
                 if (Array.isArray(technicians)) {
                     const technicianSelect = document.getElementById('technician');
                     technicians.forEach(technician => {
                         const option = document.createElement('option');
-                        option.value = technician.id; // El valor es el ID del técnico
-                        option.textContent = `ID: ${technician.id} - ${technician.username}`; // Mostrar ID y nombre del técnico
+                        option.value = technician.id; 
+                        option.textContent = `ID: ${technician.id} - ${technician.username}`; 
                         technicianSelect.appendChild(option);
                     });
                 } else {
@@ -63,19 +60,14 @@
             }
         };
 
-        // Cargar técnicos al cargar la página
         window.onload = loadTechnicians;
-
-        // Manejar el envío del formulario
         document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
         
-            // Obtener los valores
             let technicianId = document.getElementById('technician').value;
             const device = document.getElementById('device').value;
             const datetime = document.getElementById('datetime').value;
         
-            // Convertir technicianId a un número entero
             technicianId = parseInt(technicianId, 10);
             if (isNaN(technicianId)) {
                 alert('El ID del técnico debe ser un número válido.');
@@ -83,8 +75,7 @@
             }
         
             const token = localStorage.getItem('token');
-        
-            // Enviar los datos al backend
+    
             const response = await fetch('/api/appointments', {
                 method: 'POST',
                 headers: {
@@ -102,7 +93,7 @@
         
             if (response.ok) {
                 alert('Cita creada con éxito.');
-                window.location.href = '/appointments';  // Redirigir a la página de citas
+                window.location.href = '/appointments';  
             } else {
                 alert(data.error || 'Error al crear la cita');
             }

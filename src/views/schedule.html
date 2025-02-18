@@ -22,11 +22,10 @@
             alert('No estás autenticado, redirigiendo a login...');
             window.location.href = '/login';
         } else {
-            // Obtener el ID del usuario del token decodificado
+            
             const decodedToken = jwt_decode(token);
-            const userId = decodedToken.id; // Asumiendo que el ID del usuario está en el token
+            const userId = decodedToken.id; 
 
-            // Obtener citas del usuario
             fetch(`/api/user/schedule`, {
                 method: 'GET',
                 headers: {
@@ -44,9 +43,9 @@
                 return response.json();
             })
             .then(data => {
-                const appointments = data.appointments || []; // Asegurar que sea un array
+                const appointments = data.appointments || []; 
                 const container = document.getElementById('appointmentsContainer');
-                container.innerHTML = ''; // Limpiar mensaje de carga
+                container.innerHTML = '';
 
                 if (appointments.length === 0) {
                     container.innerHTML = '<p>No tienes citas programadas.</p>';
