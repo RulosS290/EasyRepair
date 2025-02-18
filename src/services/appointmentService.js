@@ -1,14 +1,13 @@
 const connection = require('../config/db');
 
-// Obtener las citas de un usuario
-// Obtener las citas de un usuario
+
 const getAppointmentsByUserId = async (userId) => {
     return new Promise((resolve, reject) => {
         console.log('Consultando citas para el usuario con ID:', userId);
 
-        // Consulta para obtener las citas
-        const query = `SELECT * FROM appointments WHERE user_id = ?`;
-        connection.query(query, [userId], async (err, appointments) => {
+        // Consulta para obtener las citas donde el usuario es paciente o técnico
+        const query = `SELECT * FROM appointments WHERE user_id = ? OR technician_id = ?`;
+        connection.query(query, [userId, userId], async (err, appointments) => {
             if (err) return reject({ status: 500, message: 'Error al obtener las citas' });
 
             if (appointments.length === 0) {
@@ -16,26 +15,26 @@ const getAppointmentsByUserId = async (userId) => {
             }
 
             // Obtener los IDs de los técnicos y usuarios
-            const technicianIds = appointments.map(a => a.technician_id);
-            const userIds = [userId, ...technicianIds];
+            const userIds = [...new Set(appointments.flatMap(a => [a.user_id, a.technician_id]))];
 
-            // Consulta para obtener los usuarios
+            // Consulta para obtener los nombres de los usuarios
             const usersQuery = `SELECT id, username FROM users WHERE id IN (?)`;
             connection.query(usersQuery, [userIds], (err, users) => {
                 if (err) return reject({ status: 500, message: 'Error al obtener los usuarios' });
 
-                // Mapear los resultados para obtener los nombres
-                const results = appointments.map(a => {
-                    const user = users.find(u => u.id === a.user_id);
-                    const technician = users.find(u => u.id === a.technician_id);
+                // Crear un diccionario para encontrar rápido los nombres por ID
+                const usersMap = Object.fromEntries(users.map(u => [u.id, u.username]));
 
+                // Construir la respuesta
+                const results = appointments.map(a => {
+                    const isTechnician = userId === a.technician_id;
+                    
                     return {
                         id: a.id,
                         datetime: a.datetime,
                         device: a.device,
                         cost: a.cost,
-                        user_name: user ? user.username : '',
-                        technician_name: technician ? technician.username : ''
+                        related_user_name: isTechnician ? usersMap[a.user_id] : usersMap[a.technician_id]
                     };
                 });
 
@@ -44,7 +43,6 @@ const getAppointmentsByUserId = async (userId) => {
         });
     });
 };
-
 
 const addAppointment = async (userId, technicianId, datetime, device, cost = 1) => {
     technicianId = typeof technicianId === 'string' ? parseInt(technicianId) : technicianId;
