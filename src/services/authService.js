@@ -1,13 +1,56 @@
-const authService = require('../services/authService');
+const connection = require('../config/db');
 
-const loginUser = async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const result = await authService.login(username, password);
-        res.json(result);
-    } catch (error) {
-        res.status(error.status || 500).json({ error: error.message });
-    }
+const login = (username, password) => {
+    return new Promise((resolve, reject) => {
+        connection.query(
+            'SELECT * FROM users WHERE username = ? AND password = ?',
+            [username, password],
+            (error, results) => {
+                if (error) {
+                    reject({ error: 'Error interno del servidor' });
+                }
+
+                if (results.length === 0) {
+                    reject({ error: 'Credenciales incorrectas' });
+                }
+
+                resolve(results[0]);
+            }
+        );
+    });
 };
 
-module.exports = { loginUser };
+const register = (username, password, type) => {
+    return new Promise((resolve, reject) => {
+        connection.query(
+            'SELECT * FROM users WHERE username = ?',
+            [username],
+            (error, results) => {
+                if (error) {
+                    reject({ error: 'Error interno del servidor' });
+                    return;
+                }
+
+                if (results.length > 0) {
+                    reject({ error: 'El usuario ya existe' });
+                    return;
+                }
+
+                connection.query(
+                    'INSERT INTO users (username, password, type) VALUES (?, ?, ?)',
+                    [username, password, type],
+                    (error, results) => {
+                        if (error) {
+                            reject({ error: 'Error al registrar el usuario' });
+                            return;
+                        }
+
+                        resolve({ message: 'Usuario registrado exitosamente' });
+                    }
+                );
+            }
+        );
+    });
+};
+
+module.exports = { login, register };

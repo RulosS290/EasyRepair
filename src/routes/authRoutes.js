@@ -1,36 +1,37 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const connection = require('../config/db');
+const authService = require('../services/authService');
 require('dotenv').config();
 
 const router = express.Router();
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    connection.query(
-        'SELECT * FROM users WHERE username = ? AND password = ?',
-        [username, password],
-        (error, results) => {
-            if (error) {
-                return res.status(500).json({ error: 'Error interno del servidor' });
-            }
+    try {
+        const user = await authService.login(username, password);
 
-            if (results.length === 0) {
-                return res.status(401).json({ error: 'Credenciales incorrectas' });
-            }
+        const token = jwt.sign(
+            { id: user.id, username: user.username, type: user.type },
+            process.env.SECRET_KEY || 'clave_secreta',
+            { expiresIn: '1h' }
+        );
 
-            const user = results[0];
+        res.json({ token });
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
 
-            const token = jwt.sign(
-                { id: user.id, username: user.username, type: user.type },
-                process.env.SECRET_KEY || 'clave_secreta',
-                { expiresIn: '1h' }
-            );
+router.post('/register', async (req, res) => {
+    const { username, password, type } = req.body;
 
-            res.json({ token });
-        }
-    );
+    try {
+        const result = await authService.register(username, password, type);
+        res.json(result);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
 module.exports = router;
