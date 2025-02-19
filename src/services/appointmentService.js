@@ -3,8 +3,8 @@ const connection = require('../config/db');
 
 const getAppointmentsByUserId = async (userId) => {
     return new Promise((resolve, reject) => {
-        
         const query = `SELECT * FROM appointments WHERE user_id = ? OR technician_id = ?`;
+        
         connection.query(query, [userId, userId], async (err, appointments) => {
             if (err) return reject({ status: 500, message: 'Error al obtener las citas' });
 
@@ -12,18 +12,14 @@ const getAppointmentsByUserId = async (userId) => {
                 return reject({ status: 404, message: 'No hay citas encontradas' });
             }
 
-            
             const userIds = [...new Set(appointments.flatMap(a => [a.user_id, a.technician_id]))];
 
-            
             const usersQuery = `SELECT id, username FROM users WHERE id IN (?)`;
             connection.query(usersQuery, [userIds], (err, users) => {
                 if (err) return reject({ status: 500, message: 'Error al obtener los usuarios' });
 
-                
                 const usersMap = Object.fromEntries(users.map(u => [u.id, u.username]));
 
-                
                 const results = appointments.map(a => {
                     const isTechnician = userId === a.technician_id;
                     
@@ -32,6 +28,7 @@ const getAppointmentsByUserId = async (userId) => {
                         datetime: a.datetime,
                         device: a.device,
                         cost: a.cost,
+                        paid: a.paid === 1, 
                         related_user_name: isTechnician ? usersMap[a.user_id] : usersMap[a.technician_id]
                     };
                 });
@@ -42,12 +39,13 @@ const getAppointmentsByUserId = async (userId) => {
     });
 };
 
+
 const addAppointment = async (userId, technicianId, datetime, device, cost = 1) => {
     technicianId = typeof technicianId === 'string' ? parseInt(technicianId) : technicianId;
     datetime = typeof datetime === 'string' ? new Date(datetime) : datetime;
     datetime = datetime instanceof Date ? datetime : new Date(datetime);
+    
     return new Promise((resolve, reject) => {
-
         if (!userId || !technicianId || !datetime || !device || !cost) {
             return reject({ status: 400, message: 'Faltan datos necesarios para la cita' });
         }
@@ -66,9 +64,9 @@ const addAppointment = async (userId, technicianId, datetime, device, cost = 1) 
         
             const technician = technicianResults[0]; 
         
-            const query = `INSERT INTO appointments (user_id, technician_id, datetime, device, cost) 
-                           VALUES (?, ?, ?, ?, ?)`;
-            connection.query(query, [userId, technicianId, datetime, device, cost], (err, results) => {
+            const query = `INSERT INTO appointments (user_id, technician_id, datetime, device, cost, paid) 
+                           VALUES (?, ?, ?, ?, ?, ?)`;
+            connection.query(query, [userId, technicianId, datetime, device, cost, 0], (err, results) => {
                 if (err) {
                     console.error('Error al insertar la cita:', err);
                     return reject({ status: 500, message: 'Error al agregar cita' });
@@ -81,11 +79,30 @@ const addAppointment = async (userId, technicianId, datetime, device, cost = 1) 
                     technicianName: technician.username, 
                     datetime, 
                     device, 
-                    cost
+                    cost, 
+                    paid: 0 
                 });
             });
         });
-        
+    });
+};
+
+const updateAppointmentPaid = (appointmentId) => {
+    return new Promise((resolve, reject) => {
+        const query = `UPDATE appointments SET paid = 1 WHERE id = ? AND paid = 0`;
+
+        connection.query(query, [appointmentId], (err, results) => {
+            if (err) {
+                console.error('Error al actualizar el pago:', err);
+                return reject({ status: 500, message: 'Error al actualizar el pago' });
+            }
+
+            if (results.affectedRows === 0) {
+                return reject({ status: 400, message: 'La cita ya está pagada o no existe' });
+            }
+
+            resolve({ status: 200, message: 'Pago registrado correctamente' });
+        });
     });
 };
 
@@ -101,4 +118,4 @@ const getAllTechnicians = async () => {
     });
 };
 
-module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians };
+module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid };
