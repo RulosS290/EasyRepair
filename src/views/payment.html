@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Mis Citas 🎉</title>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+</head>
+<body>
+    <h2>📅 Mis Citas</h2>
+    <div id="paymentMessage"></div> 
+    <div id="appointmentsContainer">
+        <p>⏳ Cargando cita...</p>
+    </div>
+
+    <br>
+    <a href="/user/schedule">⬅️ Volver al horario</a> 
+
+    <script>
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('🚨 No estás autenticado, redirigiendo a login...');
+            window.location.href = '/login';
+        } else {
+            const decodedToken = jwt_decode(token);
+            const userType = decodedToken.type; 
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const appointmentId = urlParams.get('id');
+
+            fetch(`/api/user/schedule`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('❌ Error al obtener la cita.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const appointment = data.appointments.find(app => app.id == appointmentId);
+                const container = document.getElementById('appointmentsContainer');
+                const messageContainer = document.getElementById('paymentMessage');
+                container.innerHTML = '';
+
+                if (!appointment) {
+                    container.innerHTML = '<p>⚠️ No se encontró la cita.</p>';
+                    return;
+                }
+
+                
+                const columnHeader = userType === 'user' ? '👨‍🔧 Técnico' : '👤 Usuario';
+
+                
+                messageContainer.innerHTML = `<p>${userType === 'technical' ? '👨‍🔧 ¡El usuario ya realizó el pago!' : '✅ ¡Pago realizado con éxito!'}</p>`;
+
+                const table = document.createElement('table');
+                table.border = '1';
+                table.innerHTML = `
+                    <tr>
+                        <th>📅 Fecha</th>
+                        <th>⏰ Hora</th>
+                        <th>💻 Dispositivo</th>
+                        <th>${columnHeader}</th>
+                    </tr>
+                    <tr>
+                        <td>${new Date(appointment.datetime).toLocaleDateString()}</td>
+                        <td>${new Date(appointment.datetime).toLocaleTimeString()}</td>
+                        <td>${appointment.device}</td>
+                        <td>${appointment.related_user_name}</td>
+                    </tr>
+                `;
+
+                container.appendChild(table);
+            })
+            .catch(error => {
+                console.error('Error:', error.message);
+                document.getElementById('appointmentsContainer').innerHTML = `<p>❌ ${error.message}</p>`;
+            });
+        }
+    </script>
+</body>
+</html>

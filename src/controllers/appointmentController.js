@@ -33,4 +33,15 @@ const getTechnicians = async (req, res) => {
     }
 };
 
-module.exports = { getAppointments, addAppointment, getTechnicians };
+const updateAppointmentPaid = async (req, res) => {
+    const appointmentId = req.params.id;
+    try {
+        const result = await appointmentService.updateAppointmentPaid(appointmentId);
+        res.status(result.status).json({ message: result.message });
+    } catch (error) {
+        console.error('Error al procesar el pago:', error);
+        res.status(error.status || 500).json({ error: error.message || 'Error en el servidor' });
+    }
+};
+
+module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid };

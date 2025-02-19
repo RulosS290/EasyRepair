@@ -22,9 +22,9 @@
             alert('No estás autenticado, redirigiendo a login...');
             window.location.href = '/login';
         } else {
-            
             const decodedToken = jwt_decode(token);
-            const userId = decodedToken.id; 
+            const userType = decodedToken.type; 
+            const columnHeader = userType === 'user' ? 'Técnico' : 'Usuario'; 
 
             fetch(`/api/user/schedule`, {
                 method: 'GET',
@@ -43,7 +43,7 @@
                 return response.json();
             })
             .then(data => {
-                const appointments = data.appointments || []; 
+                const appointments = data.appointments || [];
                 const container = document.getElementById('appointmentsContainer');
                 container.innerHTML = '';
 
@@ -59,17 +59,36 @@
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Dispositivo</th>
-                        <th>Usuario</th>
+                        <th>${columnHeader}</th>
+                        <th>Estado de Pago</th>
+                        <th>Acción</th>
                     </tr>
                 `;
 
                 appointments.forEach(app => {
                     const row = document.createElement('tr');
+                    const isPaid = app.paid ? 'Pagado' : 'Pendiente';
+                    let buttonHtml = '';
+
+                    if (app.paid) {
+                        
+                        buttonHtml = `<button onclick="viewPayment('${app.id}')">Ver Pago</button>`;
+                    } else {
+                        
+                        if (userType === 'user') {
+                            buttonHtml = `<button onclick="payAppointment('${app.id}')">Pagar</button>`;
+                        } else {
+                            buttonHtml = '-'; 
+                        }
+                    }
+
                     row.innerHTML = `
                         <td>${new Date(app.datetime).toLocaleDateString()}</td>
                         <td>${new Date(app.datetime).toLocaleTimeString()}</td>
                         <td>${app.device}</td>
                         <td>${app.related_user_name}</td>
+                        <td>${isPaid}</td>
+                        <td>${buttonHtml}</td>
                     `;
                     table.appendChild(row);
                 });
@@ -80,7 +99,35 @@
                 console.error('Error:', error.message);
                 document.getElementById('appointmentsContainer').innerHTML = `<p>${error.message}</p>`;
             });
+        }
 
+        function payAppointment(appointmentId) {
+        
+            fetch(`/api/appointments/pay/${appointmentId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json' 
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Error ${response.status}: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error detallado:', error);
+                alert('Error en el pago: ' + error.message);
+            });
+        }
+        
+        function viewPayment(appointmentId) {
+            window.location.href = `/payment?id=${appointmentId}`;
         }
 
         function goBack() {
