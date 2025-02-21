@@ -118,4 +118,20 @@ const getAllTechnicians = async () => {
     });
 };
 
-module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid };
+const deleteAppointment = (appointmentId) => {
+    return new Promise((resolve, reject) => {
+        const query = `DELETE FROM appointments WHERE id = ?`;
+        connection.query(query, [appointmentId], (err, results) => {
+            if (err) {
+                console.error('Error al eliminar la cita:', err);
+                return reject({ status: 500, message: 'Error en el servidor' });
+            }
+            if (results.affectedRows === 0) {
+                return reject({ status: 404, message: 'Cita no encontrada' });
+            }
+            resolve({ status: 200, message: 'Cita eliminada exitosamente' });
+        });
+    });
+};
+
+module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid, deleteAppointment };

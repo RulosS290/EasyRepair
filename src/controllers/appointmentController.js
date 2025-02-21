@@ -44,4 +44,21 @@ const updateAppointmentPaid = async (req, res) => {
     }
 };
 
-module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid };
+// 🔥 Nueva función para eliminar una cita 🔥
+const deleteAppointment = async (req, res) => {
+    const appointmentId = req.params.id;
+    try {
+        const result = await appointmentService.deleteAppointment(appointmentId);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Cita no encontrada' });
+        }
+        res.status(200).json({ message: 'Cita eliminada exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar la cita:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+};
+
+module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment };
+
+

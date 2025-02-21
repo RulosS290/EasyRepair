@@ -12,4 +12,7 @@ router.get('/appointmentsGetTechnicians', authenticateToken, appointmentControll
 
 router.patch('/appointments/pay/:id', appointmentController.updateAppointmentPaid);
 
+router.delete('/appointments/:id', authenticateToken, appointmentController.deleteAppointment);
+
+
 module.exports = router;

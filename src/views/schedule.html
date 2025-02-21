@@ -62,6 +62,7 @@
                         <th>${columnHeader}</th>
                         <th>Estado de Pago</th>
                         <th>Acción</th>
+                        <th>Eliminar</th>
                     </tr>
                 `;
 
@@ -71,10 +72,8 @@
                     let buttonHtml = '';
 
                     if (app.paid) {
-                        
                         buttonHtml = `<button onclick="viewPayment('${app.id}')">Ver Pago</button>`;
                     } else {
-                        
                         if (userType === 'user') {
                             buttonHtml = `<button onclick="payAppointment('${app.id}')">Pagar</button>`;
                         } else {
@@ -89,6 +88,7 @@
                         <td>${app.related_user_name}</td>
                         <td>${isPaid}</td>
                         <td>${buttonHtml}</td>
+                        <td><button onclick="deleteAppointment('${app.id}')">Eliminar</button></td>
                     `;
                     table.appendChild(row);
                 });
@@ -102,7 +102,6 @@
         }
 
         function payAppointment(appointmentId) {
-        
             fetch(`/api/appointments/pay/${appointmentId}`, {
                 method: 'PATCH',
                 headers: { 
@@ -128,6 +127,29 @@
         
         function viewPayment(appointmentId) {
             window.location.href = `/payment?id=${appointmentId}`;
+        }
+
+        function deleteAppointment(appointmentId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
+                fetch(`/api/appointments/${appointmentId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(`Error ${response.status}: ${text}`); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error detallado:', error);
+                    alert('Error al eliminar la cita: ' + error.message);
+                });
+            }
         }
 
         function goBack() {
