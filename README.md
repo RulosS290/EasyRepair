@@ -4,7 +4,6 @@
 
 *  [Daniel Santiago Torres Acosta](https://github.com/RulosS290)
 *  [Diego Fernando Castellanos Amaya](https://github.com/Diegoc04)
-*  [Julian David Triana Roa](https://github.com/juliandtrianar)
 
 ## Descripción del Proyecto
 
