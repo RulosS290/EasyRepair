@@ -54,6 +54,10 @@
         <button onclick="goToUserSchedule()">Ver Horario</button>
     </div>
 
+    <div>
+        <button onclick="goToUserSupportTickets()">Preguntas</button>
+    </div>
+
     <script>
         const token = localStorage.getItem('token');
 
@@ -75,8 +79,6 @@
                 document.getElementById('userOptions').style.display = 'block';
             } else if (userType === 'technical') {
                 document.getElementById('techOptions').style.display = 'block';
-            } else {
-                alert('Tipo de usuario no reconocido');
             }
             fetch('/api/users', {
                 method: 'GET',
@@ -121,6 +123,10 @@
 
         function goToAdmin() {
             window.location.href = '/admin';
+        }
+
+        function goToUserSupportTickets() {
+            window.location.href = '/user/supportTickets';
         }
     </script>
 </body>

@@ -1,19 +1,14 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); // Importa la versión con promesas
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'root',
     database: 'USERS',
-    port: 3307
-});
-
-connection.connect((error) => {
-    if (error) {
-        console.error('Error de conexión a MySQL:', error);
-        return;
-    }
-    console.log('✅ Conexión exitosa a MySQL');
+    port: 3307,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 module.exports = connection;

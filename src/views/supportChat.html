@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat de Soporte</title>
+</head>
+<body>
+
+    <h2>Chat de Soporte</h2>
+    <div>
+        <label for="ticketId">ID del Ticket:</label>
+        <input type="text" id="ticketId" readonly>
+    </div>
+
+    <div id="chatContainer">
+        <ul id="messagesList">
+            <!-- Aquí se mostrarán los mensajes -->
+        </ul>
+    </div>
+
+    <div>
+        <textarea id="messageInput" placeholder="Escribe tu mensaje"></textarea>
+        <button id="sendMessage">Enviar</button>
+    </div>
+
+</body>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const ticketId = new URLSearchParams(window.location.search).get("ticketId");
+            if (!ticketId) {
+                alert("Error: No se ha especificado un ticket.");
+                return;
+            }
+
+            document.getElementById("ticketId").value = ticketId;
+
+            // Cargar mensajes del ticket
+            async function loadMessages() {
+                const token = localStorage.getItem("token");
+                const response = await fetch(`/api/supportTicket/${ticketId}/messages`, {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+
+                const messages = await response.json();
+                const messagesList = document.getElementById("messagesList");
+                messagesList.innerHTML = "";
+
+                messages.forEach(msg => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `[${msg.username}]: ${msg.message}`;
+                    messagesList.appendChild(listItem);
+                });
+            }
+
+            // Enviar un nuevo mensaje
+            document.getElementById("sendMessage").addEventListener("click", async () => {
+                const message = document.getElementById("messageInput").value;
+                if (!message) return;
+
+                const token = localStorage.getItem("token");
+                await fetch(`/api/supportTicket/${ticketId}/messages`, {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                document.getElementById("messageInput").value = "";
+                loadMessages();
+            });
+
+            // Cargar mensajes al iniciar
+            loadMessages();
+        });
+
+    </script>
+</html>

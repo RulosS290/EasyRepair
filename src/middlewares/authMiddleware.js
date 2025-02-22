@@ -12,4 +12,11 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-module.exports = authenticateToken;
+function isAdmin(req, res, next) {
+    if (req.user.type !== "admin") {
+        return res.status(403).json({ message: "Acceso denegado. Se requieren permisos de administrador." });
+    }
+    next();
+}
+
+module.exports = { authenticateToken, isAdmin };
