@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Tickets de Soporte</title>
+</head>
+<body>
+    <h2>Crear Ticket de Soporte</h2>
+    <form id="supportTicketForm">
+        <label for="type">Tipo de Ticket:</label>
+        <select id="type" name="type" required>
+            <option value="">Seleccione un tipo</option>
+            <option value="Problem">Problema</option>
+            <option value="Question">Preguntas</option>
+            <option value="Other">Otro</option>
+        </select>
+        <br>
+        <label for="description">Descripción:</label>
+        <textarea id="description" name="description" required></textarea>
+        <br>
+        <button type="submit">Enviar Ticket</button>
+    </form>
+
+    <h2>Lista de Tickets de Soporte</h2>
+    <button id="loadTickets">Cargar Tickets</button>
+    <p id="adminMessage" style="color: red; display: none;">No tienes permisos para ver todos los tickets.</p>
+    <table border="1" id="ticketsTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>ID Usuario</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Descripción</th>
+                <th>Fecha de Creación</th>
+                <th>Chat</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Aquí se cargarán los tickets dinámicamente -->
+        </tbody>
+    </table>
+    
+    <script>
+        async function loadTickets() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("No estás autenticado.");
+                return;
+            }
+    
+            // Decodificar el token para saber si el usuario es admin
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const isAdmin = payload.type === "admin";
+    
+            const endpoint = isAdmin ? '/api/user/supportTicket' : '/api/user/supportTicket/myTickets';
+    
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+    
+                if (!response.ok) throw new Error(`Error ${response.status}`);
+    
+                const result = await response.json();
+                console.log("Tickets recibidos:", result);
+    
+                const tableBody = document.querySelector("#ticketsTable tbody");
+                tableBody.innerHTML = "";
+    
+                result.forEach(ticket => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${ticket.id_ticket}</td>
+                        <td>${ticket.id_user}</td>
+                        <td>${ticket.type}</td>
+                        <td>${ticket.state ? "Abierto" : "Cerrado"}</td>
+                        <td>${ticket.description}</td>
+                        <td>${new Date(ticket.created_at).toLocaleString()}</td>
+                        <td>
+                            <button onclick="openChat(${ticket.id_ticket})">Ver Chat</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+    
+            } catch (error) {
+                console.error("Error al cargar los tickets:", error);
+                alert("Error al cargar los tickets.");
+            }
+        }
+    
+        function openChat(ticketId) {
+            window.location.href = `/user/supportTickets/chat?ticketId=${ticketId}`;
+        }
+
+
+        document.getElementById('supportTicketForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value;
+
+            console.log("Datos enviados:", { type, description });
+
+            try {
+                const response = await fetch('/api/user/supportTicket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({ type, description })
+                });
+
+                const result = await response.json();
+                console.log("Respuesta del servidor:", result);
+
+                if (response.ok) {
+                    alert('Ticket creado con éxito');
+                    document.getElementById('supportTicketForm').reset();
+                    loadTickets();
+                } else {
+                    alert('Error al crear el ticket: ' + (result.message || 'Error desconocido'));
+                }
+
+            } catch (error) {
+                console.error("Error al crear el ticket:", error);
+                alert("Hubo un problema al enviar el ticket.");
+            }
+        });
+
+        document.getElementById('loadTickets').addEventListener('click', loadTickets);
+        document.addEventListener('DOMContentLoaded', loadTickets);
+    </script>
+
+</body>
+</html>

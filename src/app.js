@@ -5,6 +5,8 @@ const userRoutes = require('./routes/userRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const supportTickets = require('./routes/supportTicketRoutes');
+const supportMessages = require('./routes/supportMessageRoutes');
 
 const app = express();
 
@@ -32,10 +34,21 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin.html'));
 });
 
+app.get('/user/supportTickets', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'supportTickets.html'));
+});
+
+app.get('/user/supportTickets/chat', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'supportChat.html'));
+});
+
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api', appointmentRoutes);
 app.use('/api', adminRoutes);
 app.use('/', paymentRoutes);
+app.use('/api', supportTickets);
+app.use('/api', supportMessages);
+
 
 module.exports = app;

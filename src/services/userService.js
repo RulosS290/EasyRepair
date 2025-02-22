@@ -1,14 +1,20 @@
 const connection = require('../config/db');
 
 const getUserById = async (userId) => {
-    return new Promise((resolve, reject) => {
-        connection.query('SELECT id, username, type FROM users WHERE id = ?', [userId], (err, results) => {
-            if (err) return reject({ status: 500, message: 'Error en el servidor' });
-            if (results.length === 0) return reject({ status: 404, message: 'Usuario no encontrado' });
+    try {
+        const [results] = await connection.query(
+            'SELECT id, username, type FROM users WHERE id = ?',
+            [userId]
+        );
 
-            resolve(results[0]);
-        });
-    });
+        if (results.length === 0) {
+            throw { status: 404, message: 'Usuario no encontrado' };
+        }
+
+        return results[0];
+    } catch (error) {
+        throw { status: 500, message: 'Error en el servidor' };
+    }
 };
 
 module.exports = { getUserById };
