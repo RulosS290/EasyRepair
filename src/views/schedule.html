@@ -5,6 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Citas</title>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <style>
+        /* Estilos del modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: center;
+        }
+        .close {
+            color: red;
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h2>Mis Citas</h2>
@@ -15,7 +42,22 @@
     <br>
     <button onclick="goBack()">Volver</button>
 
+    <!-- Modal de edición -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Editar Cita</h3>
+            <label for="newDatetime">Nueva Fecha y Hora:</label>
+            <input type="datetime-local" id="newDatetime"><br><br>
+            <label for="newDevice">Nuevo Dispositivo:</label>
+            <input type="text" id="newDevice"><br><br>
+            <button onclick="saveChanges()">Guardar Cambios</button>
+        </div>
+    </div>
+
     <script>
+        let selectedAppointmentId = null;
+
         const token = localStorage.getItem('token');
 
         if (!token) {
@@ -24,7 +66,6 @@
         } else {
             const decodedToken = jwt_decode(token);
             const userType = decodedToken.type; 
-            const columnHeader = userType === 'user' ? 'Técnico' : 'Usuario'; 
 
             fetch(`/api/user/schedule`, {
                 method: 'GET',
@@ -52,108 +93,44 @@
                     return;
                 }
 
-                const table = document.createElement('table');
-                table.border = '1';
-                table.innerHTML = `
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Dispositivo</th>
-                        <th>${columnHeader}</th>
-                        <th>Estado de Pago</th>
-                        <th>Acción</th>
-                        <th>Eliminar</th>
-                    </tr>
-                `;
+                let tableUser = '<h3>Citas como Usuario</h3><table border="1"><tr><th>Fecha</th><th>Hora</th><th>Dispositivo</th><th>Técnico</th><th>Estado de Pago</th><th>Acción</th><th>Editar</th><th>Eliminar</th></tr>';
+                let tableTech = '<h3>Citas como Técnico</h3><table border="1"><tr><th>Fecha</th><th>Hora</th><th>Dispositivo</th><th>Usuario</th><th>Estado de Pago</th><th>Acción</th></tr>';
 
                 appointments.forEach(app => {
-                    const row = document.createElement('tr');
                     const isPaid = app.paid ? 'Pagado' : 'Pendiente';
-                    let buttonHtml = '';
+                    let buttonHtml = app.paid ? `<button onclick="viewPayment('${app.id}')">Ver Pago</button>` : userType === 'user' ? `<button onclick="payAppointment('${app.id}')">Pagar</button>` : '-';
 
-                    if (app.paid) {
-                        buttonHtml = `<button onclick="viewPayment('${app.id}')">Ver Pago</button>`;
-                    } else {
-                        if (userType === 'user') {
-                            buttonHtml = `<button onclick="payAppointment('${app.id}')">Pagar</button>`;
-                        } else {
-                            buttonHtml = '-'; 
-                        }
-                    }
-
-                    row.innerHTML = `
-                        <td>${new Date(app.datetime).toLocaleDateString()}</td>
-                        <td>${new Date(app.datetime).toLocaleTimeString()}</td>
-                        <td>${app.device}</td>
-                        <td>${app.related_user_name}</td>
-                        <td>${isPaid}</td>
-                        <td>${buttonHtml}</td>
-                        <td><button onclick="deleteAppointment('${app.id}')">Eliminar</button></td>
+                    const row = `
+                        <tr>
+                            <td>${new Date(app.datetime).toLocaleDateString()}</td>
+                            <td>${new Date(app.datetime).toLocaleTimeString()}</td>
+                            <td>${app.device}</td>
+                            <td>${app.related_user_name}</td>
+                            <td>${isPaid}</td>
+                            <td>${buttonHtml}</td>
+                        </tr>
                     `;
-                    table.appendChild(row);
+
+                    if (userType === 'user') {
+                        tableUser += row.replace('</tr>', `<td><button onclick="openModal('${app.id}', '${app.datetime}', '${app.device}')">Editar</button></td><td><button onclick="deleteAppointment('${app.id}')">Eliminar</button></td></tr>`);
+                    } else {
+                        tableTech += row;
+                    }
                 });
 
-                container.appendChild(table);
+                tableUser += '</table>';
+                tableTech += '</table>';
+
+                if (userType === 'user') {
+                    container.innerHTML = tableUser;
+                } else {
+                    container.innerHTML = tableTech;
+                }
             })
             .catch(error => {
                 console.error('Error:', error.message);
                 document.getElementById('appointmentsContainer').innerHTML = `<p>${error.message}</p>`;
             });
-        }
-
-        function payAppointment(appointmentId) {
-            fetch(`/api/appointments/pay/${appointmentId}`, {
-                method: 'PATCH',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json' 
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(`Error ${response.status}: ${text}`); });
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-                location.reload();
-            })
-            .catch(error => {
-                console.error('Error detallado:', error);
-                alert('Error en el pago: ' + error.message);
-            });
-        }
-        
-        function viewPayment(appointmentId) {
-            window.location.href = `/payment?id=${appointmentId}`;
-        }
-
-        function deleteAppointment(appointmentId) {
-            if (confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
-                fetch(`/api/appointments/${appointmentId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(`Error ${response.status}: ${text}`); });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    alert(data.message);
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Error detallado:', error);
-                    alert('Error al eliminar la cita: ' + error.message);
-                });
-            }
-        }
-
-        function goBack() {
-            window.location.href = '/user';
         }
     </script>
 </body>

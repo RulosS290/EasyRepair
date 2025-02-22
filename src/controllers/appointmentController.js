@@ -59,6 +59,24 @@ const deleteAppointment = async (req, res) => {
     }
 };
 
-module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment };
+const updateAppointment = async (req, res) => {
+    const appointmentId = req.params.id;
+    const { datetime, device, paid } = req.body;
+
+    if (!datetime || !device || paid === undefined) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+    }
+
+    try {
+        const result = await appointmentService.updateAppointment(appointmentId, datetime, device, paid);
+        res.status(result.status).json({ message: result.message });
+    } catch (error) {
+        console.error('Error al actualizar la cita:', error);
+        res.status(error.status || 500).json({ error: error.message || 'Error en el servidor' });
+    }
+};
+
+
+module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment };
 
 
