@@ -5,6 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Citas</title>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <style>
+        /* Estilos del modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: center;
+        }
+        .close {
+            color: red;
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h2>Mis Citas</h2>
@@ -15,7 +42,22 @@
     <br>
     <button onclick="goBack()">Volver</button>
 
+    <!-- Modal de edición -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Editar Cita</h3>
+            <label for="newDatetime">Nueva Fecha y Hora:</label>
+            <input type="datetime-local" id="newDatetime"><br><br>
+            <label for="newDevice">Nuevo Dispositivo:</label>
+            <input type="text" id="newDevice"><br><br>
+            <button onclick="saveChanges()">Guardar Cambios</button>
+        </div>
+    </div>
+
     <script>
+        let selectedAppointmentId = null;
+
         const token = localStorage.getItem('token');
 
         if (!token) {
@@ -62,6 +104,8 @@
                         <th>${columnHeader}</th>
                         <th>Estado de Pago</th>
                         <th>Acción</th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
                     </tr>
                 `;
 
@@ -71,10 +115,8 @@
                     let buttonHtml = '';
 
                     if (app.paid) {
-                        
                         buttonHtml = `<button onclick="viewPayment('${app.id}')">Ver Pago</button>`;
                     } else {
-                        
                         if (userType === 'user') {
                             buttonHtml = `<button onclick="payAppointment('${app.id}')">Pagar</button>`;
                         } else {
@@ -89,6 +131,8 @@
                         <td>${app.related_user_name}</td>
                         <td>${isPaid}</td>
                         <td>${buttonHtml}</td>
+                        <td><button onclick="openModal('${app.id}', '${app.datetime}', '${app.device}')">Editar</button></td>
+                        <td><button onclick="deleteAppointment('${app.id}')">Eliminar</button></td>
                     `;
                     table.appendChild(row);
                 });
@@ -102,7 +146,6 @@
         }
 
         function payAppointment(appointmentId) {
-        
             fetch(`/api/appointments/pay/${appointmentId}`, {
                 method: 'PATCH',
                 headers: { 
@@ -130,6 +173,74 @@
             window.location.href = `/payment?id=${appointmentId}`;
         }
 
+        function deleteAppointment(appointmentId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
+                fetch(`/api/appointments/${appointmentId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(`Error ${response.status}: ${text}`); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error detallado:', error);
+                    alert('Error al eliminar la cita: ' + error.message);
+                });
+            }
+        }
+
+        function openModal(appointmentId, currentDatetime, currentDevice) {
+            selectedAppointmentId = appointmentId;
+            document.getElementById('newDatetime').value = currentDatetime.slice(0, 16); // Formato compatible con datetime-local
+            document.getElementById('newDevice').value = currentDevice;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function saveChanges() {
+            const newDatetime = document.getElementById('newDatetime').value;
+            const newDevice = document.getElementById('newDevice').value;
+            
+            if (!newDatetime || !newDevice) {
+                alert('Todos los campos son obligatorios.');
+                return;
+            }
+        
+            fetch(`/api/appointments/${selectedAppointmentId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    datetime: newDatetime,
+                    device: newDevice,
+                    paid: 1  // Confirmamos que se actualice el pago
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                alert('Cita actualizada correctamente.');
+                closeModal();
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error al actualizar la cita:', error);
+                alert('Error al actualizar la cita: ' + error.message);
+            });
+        }
+        
         function goBack() {
             window.location.href = '/user';
         }
