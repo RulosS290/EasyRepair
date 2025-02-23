@@ -1,10 +1,5 @@
 # EasyRepair
 
-## Integrantes
-
-*  [Daniel Santiago Torres Acosta](https://github.com/RulosS290)
-*  [Diego Fernando Castellanos Amaya](https://github.com/Diegoc04)
-
 ## Descripción del Proyecto
 
 EasyRepair es una plataforma web y móvil que conecta a usuarios con técnicos certificados para la reparación de dispositivos electrónicos y electrodomésticos. Permite solicitar reparaciones a domicilio o encontrar talleres cercanos, con un sistema de valoración para garantizar la calidad del servicio.
@@ -13,10 +8,32 @@ EasyRepair es una plataforma web y móvil que conecta a usuarios con técnicos c
 
 *  [Node.js](https://nodejs.org/es): 22.13.1
 
-## Dependencias
+## **Dependencias principales (`dependencies`)**
+1. **dotenv (`^16.4.7`)**  
+   - Permite cargar variables de entorno desde un archivo `.env` en `process.env`, facilitando la configuración de credenciales y valores sensibles sin exponerlos en el código fuente.
 
-* express: 4.21.2 → Framework para crear servidores web en Node.js.
-* nodemon: 3.1.9 → Herramienta para reiniciar automáticamente el servidor cuando hay cambios en el código.
+2. **express (`^4.21.2`)**  
+   - Framework minimalista para Node.js que facilita la creación de servidores web y APIs REST.
+
+3. **jsonwebtoken (`^9.0.2`)**  
+   - Librería para generar y verificar tokens JWT (JSON Web Token), usados para autenticación segura en aplicaciones web.
+
+4. **jwt-decode (`^4.0.0`)**  
+   - Permite decodificar tokens JWT sin necesidad de validarlos o proporcionar una clave secreta, útil para extraer información del payload.
+
+5. **mysql2 (`^3.12.0`)**  
+   - Una versión mejorada del paquete `mysql`, con soporte para Promises y mejoras de rendimiento.
+
+## **Dependencias de desarrollo (`devDependencies`)**
+
+7. **jest (`^29.7.0`)**  
+   - Framework de pruebas para JavaScript, utilizado para escribir y ejecutar pruebas unitarias y de integración de manera sencilla.
+
+8. **supertest (`^7.0.0`)**  
+   - Librería para realizar pruebas HTTP en servidores Node.js basados en `express`, permitiendo probar endpoints de APIs de manera eficiente.
+
+9. **nodemon (`^3.1.9`)**  
+   - Herramienta que reinicia automáticamente la aplicación cuando detecta cambios en los archivos, útil para el desarrollo en Node.js.
 
 ### Instrucciones de instalamiento
 
@@ -25,7 +42,6 @@ EasyRepair es una plataforma web y móvil que conecta a usuarios con técnicos c
 ```bash
 git clone https://github.com/RulosS290/EasyRepair.git
 ```
- 
 
 2. Muevete a la carpeta clonada.
    
@@ -36,22 +52,16 @@ cd EasyRepair/
 3. Instala las dependencias:
    
 ```bash
-npm init --yes
-
 npm install
-
-npm i express
-
-npm i nodemon -D
 ```
 
-5. Ejecuta el comando npm run start.  
+4. Ejecuta el programa.  
 
  ```bash
-npm run start
+node src/server.js
 ```
 
-6. Abre este [link](http://localhost:5555/endpoint)
+5. Abre este [link](http://localhost:3000/login) para ver la app
 
 ## Endpoints
 
@@ -196,3 +206,8 @@ npm run start
 
 # Video sprint 1
 [Link](https://youtu.be/48XF7RM1qM8)
+
+## Integrantes
+
+*  [Daniel Santiago Torres Acosta](https://github.com/RulosS290)
+*  [Diego Fernando Castellanos Amaya](https://github.com/Diegoc04)
