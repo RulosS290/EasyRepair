@@ -35,6 +35,9 @@
 <body>
     <h2>Información del Usuario</h2>
     <div id="userInfo"></div>
+
+    <h3>Promedio de Valoraciones</h3>
+    <div id="averageRatings"></div> 
     
     <h3>Token de sesión</h3>
     <textarea id="tokenDisplay" readonly rows="4" cols="50"></textarea>
@@ -43,13 +46,11 @@
     <button onclick="logout()">Cerrar Sesión</button>
     <button id="adminBtn" onclick="goToAdmin()">Administrar Usuarios</button>
 
-  
     <div id="userOptions" style="display: none;">
         <button onclick="goToAppointments()">Agendar Citas</button>
         <button onclick="goToUserSchedule()">Ver Citas</button>
     </div>
 
-   
     <div id="techOptions" style="display: none;">
         <button onclick="goToUserSchedule()">Ver Horario</button>
     </div>
@@ -67,6 +68,7 @@
         } else {
             document.getElementById('tokenDisplay').textContent = token;
             const decodedToken = jwt_decode(token);
+            const userId = decodedToken.id;
             const userType = decodedToken.type;
 
             document.getElementById('userInfo').innerHTML = `
@@ -77,9 +79,12 @@
 
             if (userType === 'user') {
                 document.getElementById('userOptions').style.display = 'block';
+                getUserAverageRating(userId); 
             } else if (userType === 'technical') {
                 document.getElementById('techOptions').style.display = 'block';
+                getTechnicianAverageRating(userId); 
             }
+
             fetch('/api/users', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -105,6 +110,42 @@
                 console.error('Error:', error);
                 alert('Error al obtener la información del usuario.');
                 window.location.href = '/login';
+            });
+        }
+
+        function getUserAverageRating(userId) {
+            fetch(`/api/appointments/rating/user/${userId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.average !== undefined) {  
+                    document.getElementById('averageRatings').innerHTML = `
+                        <p><strong>Promedio de Valoración del Usuario:</strong> ${data.average.toFixed(2)}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener el promedio de la valoración del usuario:', error);
+            });
+        }
+
+        function getTechnicianAverageRating(technicianId) {
+            fetch(`/api/appointments/rating/technician/${technicianId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.average !== undefined) {  
+                    document.getElementById('averageRatings').innerHTML = `
+                        <p><strong>Promedio de Valoración del Técnico:</strong> ${data.average.toFixed(2)}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener el promedio de la valoración del técnico:', error);
             });
         }
 

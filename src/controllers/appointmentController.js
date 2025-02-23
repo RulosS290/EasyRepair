@@ -44,7 +44,24 @@ const updateAppointmentPaid = async (req, res) => {
     }
 };
 
-// 🔥 Nueva función para eliminar una cita 🔥
+const updateAppointmentRate = async (req, res) => {
+    const appointmentId = req.params.id; 
+    const { rate } = req.body; 
+
+    if (!rate) {
+        return res.status(400).json({ message: 'Debe proporcionar una calificación' });
+    }
+
+    try {
+        const result = await appointmentService.updateAppointmentRate(appointmentId, rate);
+        res.status(result.status).json({ message: result.message });
+    } catch (error) {
+        console.error('Error al actualizar la calificación:', error);
+        res.status(error.status || 500).json({ error: error.message || 'Error en el servidor' });
+    }
+};
+
+
 const deleteAppointment = async (req, res) => {
     const appointmentId = req.params.id;
     try {
@@ -77,6 +94,30 @@ const updateAppointment = async (req, res) => {
 };
 
 
-module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment };
+const getUserRatingAverage = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const average = await appointmentService.getUserRatingAverage(userId);
+        return res.status(200).json({ average });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error al obtener el promedio de valoraciones del usuario' });
+    }
+};
+
+const getTechnicianRatingAverage = async (req, res) => {
+    const { technicianId } = req.params;
+
+    try {
+        const average = await appointmentService.getTechnicianRatingAverage(technicianId);
+        return res.status(200).json({ average });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error al obtener el promedio de valoraciones del técnico' });
+    }
+};
+
+module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate, getUserRatingAverage, getTechnicianRatingAverage };
 
 

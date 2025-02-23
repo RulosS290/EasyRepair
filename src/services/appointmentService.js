@@ -1,4 +1,5 @@
 const connection = require('../config/db');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 const getAppointmentsByUserId = async (userId) => {
     try {
@@ -89,6 +90,42 @@ const updateAppointmentPaid = async (appointmentId) => {
     }
 };
 
+const updateAppointmentRate = async (appointmentId, rate) => {
+    try {
+        const [appointment] = await connection.query(
+            `SELECT technician_rate, user_rate FROM appointments WHERE id = ?`,
+            [appointmentId]
+        );
+
+        if (appointment.length === 0) {
+            throw { status: 400, message: 'La cita no existe' };
+        }
+
+        let fieldToUpdate;
+
+        if (appointment[0].technician_rate === null) {
+            fieldToUpdate = 'technician_rate';
+        } else if (appointment[0].user_rate === null) {
+            fieldToUpdate = 'user_rate';
+        } else {
+            throw { status: 400, message: 'La cita ya ha sido calificada completamente' };
+        }
+
+        const [results] = await connection.query(
+            `UPDATE appointments SET ${fieldToUpdate} = ? WHERE id = ?`,
+            [rate, appointmentId]
+        );
+
+        if (results.affectedRows === 0) {
+            throw { status: 400, message: 'No se pudo actualizar la calificación' };
+        }
+
+        return { status: 200, message: 'Calificación registrada correctamente' };
+    } catch (error) {
+        throw error.status ? error : { status: 500, message: 'Error al actualizar la calificación' };
+    }
+};
+
 const getAllTechnicians = async () => {
     try {
         const [results] = await connection.query(
@@ -139,4 +176,44 @@ const updateAppointment = async (appointmentId, datetime, device, paid) => {
     }
 };
 
-module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment };
+const getUserRatingAverage = async (userId) => {
+    try {
+        const [appointments] = await connection.query(
+            `SELECT user_rate FROM appointments WHERE user_id = ? AND user_rate IS NOT NULL`,
+            [userId]
+        );
+        const userRatings = appointments.map(appointment => appointment.user_rate);
+
+        if (userRatings.length === 0) {
+            return 0;  
+        }
+        const average = userRatings.reduce((sum, rate) => sum + rate, 0) / userRatings.length;
+        return average;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error al calcular el promedio de valoraciones del usuario');
+    }
+};
+
+const getTechnicianRatingAverage = async (technicianId) => {
+    try {
+        const [appointments] = await connection.query(
+            `SELECT technician_rate FROM appointments WHERE technician_id = ? AND technician_rate IS NOT NULL`,
+            [technicianId]
+        );
+
+        const technicianRatings = appointments.map(appointment => appointment.technician_rate);
+
+        if (technicianRatings.length === 0) {
+            return 0;  
+        }
+
+        const average = technicianRatings.reduce((sum, rate) => sum + rate, 0) / technicianRatings.length;
+        return average;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error al calcular el promedio de valoraciones del técnico');
+    }
+};
+
+module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate, getUserRatingAverage, getTechnicianRatingAverage};
