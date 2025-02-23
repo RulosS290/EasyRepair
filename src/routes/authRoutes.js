@@ -13,13 +13,13 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign(
             { id: user.id, username: user.username, type: user.type },
-            process.env.SECRET_KEY || 'clave_secreta',
+            process.env.SECRET_KEY || 'default_secret_key',
             { expiresIn: '1h' }
         );
 
         res.json({ token });
     } catch (err) {
-        res.status(500).json(err);
+        res.status(err.statusCode || 500).json({ error: err.message });
     }
 });
 
@@ -28,9 +28,9 @@ router.post('/register', async (req, res) => {
 
     try {
         const result = await authService.register(username, password, type);
-        res.json(result);
+        res.status(201).json(result);
     } catch (err) {
-        res.status(500).json(err);
+        res.status(err.statusCode || 500).json({ error: err.message });
     }
 });
 

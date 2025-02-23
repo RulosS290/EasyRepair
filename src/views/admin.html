@@ -74,14 +74,24 @@
                 return response.json();
             })
             .then(users => {
-                if (!users) return;
+                console.log("Usuarios recibidos en frontend:", users);
+
+                if (!users || !Array.isArray(users)) {
+                    console.error("Formato de datos incorrecto", users);
+                    return;
+                }
+                
+                const usersList = users[0];  
+
                 const tableBody = document.getElementById("userTable");
                 tableBody.innerHTML = "";
-                users.forEach(user => {
+                
+                usersList.forEach(user => {
+                    console.log("Usuario:", user);
                     const row = `<tr>
-                        <td>${user.id}</td>
-                        <td>${user.username}</td>
-                        <td>${user.type}</td>
+                        <td>${user.id ?? 'N/A'}</td>
+                        <td>${user.username ?? 'N/A'}</td>
+                        <td>${user.type ?? 'N/A'}</td>
                         <td><button onclick="deleteUser(${user.id})">Eliminar</button></td>
                     </tr>`;
                     tableBody.innerHTML += row;
