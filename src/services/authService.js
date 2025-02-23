@@ -1,19 +1,28 @@
+const bcrypt = require('bcryptjs');
 const connection = require('../config/db');
 
 const login = async (username, password) => {
     try {
         const [results] = await connection.query(
-            'SELECT * FROM users WHERE username = ? AND password = ?',
-            [username, password]
+            'SELECT * FROM users WHERE username = ?',
+            [username]
         );
 
         if (results.length === 0) {
-            throw { error: 'Credenciales incorrectas' };
+            throw { statusCode: 401, message: 'Invalid credentials' };
         }
 
-        return results[0];
+        const user = results[0];
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw { statusCode: 401, message: 'Invalid credentials' };
+        }
+
+        return user;
     } catch (error) {
-        throw { error: 'Error interno del servidor' };
+        console.error(error);
+        throw { statusCode: 500, message: 'Internal server error' };
     }
 };
 
@@ -25,17 +34,21 @@ const register = async (username, password, type) => {
         );
 
         if (existingUser.length > 0) {
-            throw { error: 'El usuario ya existe' };
+            throw { statusCode: 409, message: 'User already exists' };
         }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         await connection.query(
             'INSERT INTO users (username, password, type) VALUES (?, ?, ?)',
-            [username, password, type]
+            [username, hashedPassword, type]
         );
 
-        return { message: 'Usuario registrado exitosamente' };
+        return { message: 'User registered successfully' };
     } catch (error) {
-        throw { error: 'Error interno del servidor' };
+        console.error(error);
+        throw { statusCode: 500, message: 'Internal server error' };
     }
 };
 

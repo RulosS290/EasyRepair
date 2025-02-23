@@ -1,4 +1,4 @@
-const mysql = require('mysql2/promise'); // Importa la versión con promesas
+const mysql = require('mysql2/promise');
 
 const connection = mysql.createPool({
     host: 'localhost',
