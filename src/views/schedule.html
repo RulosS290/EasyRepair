@@ -264,7 +264,7 @@
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json' 
                 },
-                body: JSON.stringify({ rate: parseInt(rate) }) // Enviar la calificación como número
+                body: JSON.stringify({ rate: parseInt(rate) }) 
             })
             .then(response => {
                 if (!response.ok) {

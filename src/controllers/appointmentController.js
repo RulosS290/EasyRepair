@@ -93,6 +93,31 @@ const updateAppointment = async (req, res) => {
     }
 };
 
-module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate };
+
+const getUserRatingAverage = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const average = await appointmentService.getUserRatingAverage(userId);
+        return res.status(200).json({ average });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error al obtener el promedio de valoraciones del usuario' });
+    }
+};
+
+const getTechnicianRatingAverage = async (req, res) => {
+    const { technicianId } = req.params;
+
+    try {
+        const average = await appointmentService.getTechnicianRatingAverage(technicianId);
+        return res.status(200).json({ average });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error al obtener el promedio de valoraciones del técnico' });
+    }
+};
+
+module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate, getUserRatingAverage, getTechnicianRatingAverage };
 
 

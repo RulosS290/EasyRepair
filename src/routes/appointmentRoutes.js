@@ -18,4 +18,8 @@ router.patch('/appointments/:id', authenticateToken, appointmentController.updat
 
 router.patch('/appointments/rate/:id', appointmentController.updateAppointmentRate);
 
+router.get('/appointments/rating/user/:userId', authenticateToken, appointmentController.getUserRatingAverage);
+
+router.get('/appointments/rating/technician/:technicianId', authenticateToken, appointmentController.getTechnicianRatingAverage);
+
 module.exports = router;

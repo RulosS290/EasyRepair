@@ -176,5 +176,44 @@ const updateAppointment = async (appointmentId, datetime, device, paid) => {
     }
 };
 
+const getUserRatingAverage = async (userId) => {
+    try {
+        const [appointments] = await connection.query(
+            `SELECT user_rate FROM appointments WHERE user_id = ? AND user_rate IS NOT NULL`,
+            [userId]
+        );
+        const userRatings = appointments.map(appointment => appointment.user_rate);
 
-module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate};
+        if (userRatings.length === 0) {
+            return 0;  
+        }
+        const average = userRatings.reduce((sum, rate) => sum + rate, 0) / userRatings.length;
+        return average;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error al calcular el promedio de valoraciones del usuario');
+    }
+};
+
+const getTechnicianRatingAverage = async (technicianId) => {
+    try {
+        const [appointments] = await connection.query(
+            `SELECT technician_rate FROM appointments WHERE technician_id = ? AND technician_rate IS NOT NULL`,
+            [technicianId]
+        );
+
+        const technicianRatings = appointments.map(appointment => appointment.technician_rate);
+
+        if (technicianRatings.length === 0) {
+            return 0;  
+        }
+
+        const average = technicianRatings.reduce((sum, rate) => sum + rate, 0) / technicianRatings.length;
+        return average;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error al calcular el promedio de valoraciones del técnico');
+    }
+};
+
+module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate, getUserRatingAverage, getTechnicianRatingAverage};
