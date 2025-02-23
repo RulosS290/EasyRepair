@@ -44,7 +44,24 @@ const updateAppointmentPaid = async (req, res) => {
     }
 };
 
-// 🔥 Nueva función para eliminar una cita 🔥
+const updateAppointmentRate = async (req, res) => {
+    const appointmentId = req.params.id; 
+    const { rate } = req.body; 
+
+    if (!rate) {
+        return res.status(400).json({ message: 'Debe proporcionar una calificación' });
+    }
+
+    try {
+        const result = await appointmentService.updateAppointmentRate(appointmentId, rate);
+        res.status(result.status).json({ message: result.message });
+    } catch (error) {
+        console.error('Error al actualizar la calificación:', error);
+        res.status(error.status || 500).json({ error: error.message || 'Error en el servidor' });
+    }
+};
+
+
 const deleteAppointment = async (req, res) => {
     const appointmentId = req.params.id;
     try {
@@ -76,7 +93,6 @@ const updateAppointment = async (req, res) => {
     }
 };
 
-
-module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment };
+module.exports = { getAppointments, addAppointment, getTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate };
 
 

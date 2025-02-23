@@ -106,6 +106,7 @@
                         <th>Acción</th>
                         <th>Editar</th>
                         <th>Eliminar</th>
+                        <th>Calificar</th>
                     </tr>
                 `;
 
@@ -113,6 +114,9 @@
                     const row = document.createElement('tr');
                     const isPaid = app.paid ? 'Pagado' : 'Pendiente';
                     let buttonHtml = '';
+                    let ratingButton = app.paid ? (app.rating ? `<button disabled>Calificado (${app.rating})</button>` : `<button id="rateBtn-${app.id}" onclick="rateAppointment('${app.id}')">Calificar</button>`) : '-';
+
+
 
                     if (app.paid) {
                         buttonHtml = `<button onclick="viewPayment('${app.id}')">Ver Pago</button>`;
@@ -133,6 +137,7 @@
                         <td>${buttonHtml}</td>
                         <td><button onclick="openModal('${app.id}', '${app.datetime}', '${app.device}')">Editar</button></td>
                         <td><button onclick="deleteAppointment('${app.id}')">Eliminar</button></td>
+                        <td>${ratingButton}</td>
                     `;
                     table.appendChild(row);
                 });
@@ -198,7 +203,7 @@
 
         function openModal(appointmentId, currentDatetime, currentDevice) {
             selectedAppointmentId = appointmentId;
-            document.getElementById('newDatetime').value = currentDatetime.slice(0, 16); // Formato compatible con datetime-local
+            document.getElementById('newDatetime').value = currentDatetime.slice(0, 16); 
             document.getElementById('newDevice').value = currentDevice;
             document.getElementById('editModal').style.display = 'block';
         }
@@ -225,7 +230,7 @@
                 body: JSON.stringify({
                     datetime: newDatetime,
                     device: newDevice,
-                    paid: 1  // Confirmamos que se actualice el pago
+                    paid: 1  
                 })
             })
             .then(response => response.json())
@@ -243,6 +248,42 @@
         
         function goBack() {
             window.location.href = '/user';
+        }
+
+        function rateAppointment(appointmentId) {
+            const rate = prompt("Por favor, ingresa una calificación del 1 al 5:");
+            
+            if (!rate || isNaN(rate) || rate < 1 || rate > 5) {
+                alert("Debes ingresar un número válido entre 1 y 5.");
+                return;
+            }
+        
+            fetch(`/api/appointments/rate/${appointmentId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify({ rate: parseInt(rate) }) // Enviar la calificación como número
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Error ${response.status}: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                const button = document.getElementById(`rateBtn-${appointmentId}`);
+                if (button) {
+                    button.textContent = `Calificado (${rate})`;
+                    button.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error detallado:', error);
+                alert('Error al calificar la cita: ' + error.message);
+            });
         }
     </script>
 </body>

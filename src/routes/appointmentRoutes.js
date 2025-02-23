@@ -16,4 +16,6 @@ router.delete('/appointments/:id', authenticateToken, appointmentController.dele
 
 router.patch('/appointments/:id', authenticateToken, appointmentController.updateAppointment);
 
+router.patch('/appointments/rate/:id', appointmentController.updateAppointmentRate);
+
 module.exports = router;
