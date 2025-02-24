@@ -1,56 +1,56 @@
-const request = require('supertest');
-const app = require('../app');
+const authController = require('../controllers/authController');
 const authService = require('../services/authService');
 
 jest.mock('../services/authService');
 
-describe('Auth Endpoints', () => {
-    describe('POST /login', () => {
-        it('should return a token when credentials are correct', async () => {
-            const mockUser = { id: 1, username: 'testuser', type: 'user' };
-            authService.login.mockResolvedValue(mockUser);
+describe('AuthController Endpoints', () => {
+    let req, res;
 
-            const response = await request(app)
-                .post('/api/login')
-                .send({ username: 'testuser', password: 'password123' });
-
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('token');
-        });
-
-        it('should return 500 when login fails', async () => {
-            authService.login.mockRejectedValue(new Error('Invalid credentials'));
-
-            const response = await request(app)
-                .post('/api/login')
-                .send({ username: 'invaliduser', password: 'wrongpassword' });
-
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Invalid credentials');
-        });
+    beforeEach(() => {
+        req = { body: {} };
+        res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
     });
 
-    describe('POST /register', () => {
-        it('should register a new user successfully', async () => {
-            authService.register.mockResolvedValue({ message: 'User registered successfully' });
+    test('🔹 Should handle successful login', async () => {
+        req.body = { username: 'testUser', password: 'password123' };
+        authService.login.mockResolvedValue({ id: 1, username: 'testUser', type: 'user' });
 
-            const response = await request(app)
-                .post('/api/register')
-                .send({ username: 'newuser', password: 'password123', type: 'user' });
+        await authController.loginUser(req, res);
 
-            expect(response.status).toBe(201);
-            expect(response.body).toHaveProperty('message', 'User registered successfully');
-        });
+        expect(authService.login).toHaveBeenCalledWith('testUser', 'password123');
+        expect(res.json).toHaveBeenCalledWith({ id: 1, username: 'testUser', type: 'user' });
+    });
 
-        it('should return 500 when registration fails', async () => {
-            authService.register.mockRejectedValue(new Error('User already exists'));
+    test('❌ Should handle failed login due to invalid credentials', async () => {
+        req.body = { username: 'testUser', password: 'wrongPassword' };
+        authService.login.mockRejectedValue({ statusCode: 401, message: 'Invalid credentials' });
 
-            const response = await request(app)
-                .post('/api/register')
-                .send({ username: 'existinguser', password: 'password123', type: 'user' });
+        await authController.loginUser(req, res);
 
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'User already exists');
-        });
+        expect(authService.login).toHaveBeenCalledWith('testUser', 'wrongPassword');
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Invalid credentials' });
+    });
+
+    test('Should handle successful user registration', async () => {
+        req.body = { username: 'newUser', password: 'password123', type: 'user' };
+        authService.register.mockResolvedValue({ message: 'User registered successfully' });
+
+        await authController.registerUser(req, res);
+
+        expect(authService.register).toHaveBeenCalledWith('newUser', 'password123', 'user');
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith({ message: 'User registered successfully' });
+    });
+
+    test('❌ Should handle registration failure due to existing user', async () => {
+        req.body = { username: 'existingUser', password: 'password123', type: 'user' };
+        authService.register.mockRejectedValue({ statusCode: 409, message: 'User already exists' });
+
+        await authController.registerUser(req, res);
+
+        expect(authService.register).toHaveBeenCalledWith('existingUser', 'password123', 'user');
+        expect(res.status).toHaveBeenCalledWith(409);
+        expect(res.json).toHaveBeenCalledWith({ error: 'User already exists' });
     });
 });

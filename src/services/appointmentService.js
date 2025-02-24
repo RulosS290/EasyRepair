@@ -1,5 +1,4 @@
 const connection = require('../config/db');
-const authMiddleware = require('../middlewares/authMiddleware');
 
 const getAppointmentsByUserId = async (userId) => {
     try {
@@ -182,16 +181,18 @@ const getUserRatingAverage = async (userId) => {
             `SELECT user_rate FROM appointments WHERE user_id = ? AND user_rate IS NOT NULL`,
             [userId]
         );
-        const userRatings = appointments.map(appointment => appointment.user_rate);
-
-        if (userRatings.length === 0) {
-            return 0;  
+        
+        if (!appointments || appointments.length === 0) {
+            return { status: 404, message: "No ratings found for this user." };
         }
+        
+        const userRatings = appointments.map(appointment => appointment.user_rate);
         const average = userRatings.reduce((sum, rate) => sum + rate, 0) / userRatings.length;
-        return average;
+        
+        return { status: 200, average };
     } catch (error) {
         console.error(error);
-        throw new Error('Error al calcular el promedio de valoraciones del usuario');
+        return { status: 500, message: "Error calculating user rating average." };
     }
 };
 
@@ -201,19 +202,19 @@ const getTechnicianRatingAverage = async (technicianId) => {
             `SELECT technician_rate FROM appointments WHERE technician_id = ? AND technician_rate IS NOT NULL`,
             [technicianId]
         );
-
-        const technicianRatings = appointments.map(appointment => appointment.technician_rate);
-
-        if (technicianRatings.length === 0) {
-            return 0;  
+        
+        if (!appointments || appointments.length === 0) {
+            return { status: 404, message: "No ratings found for this technician." };
         }
-
+        
+        const technicianRatings = appointments.map(appointment => appointment.technician_rate);
         const average = technicianRatings.reduce((sum, rate) => sum + rate, 0) / technicianRatings.length;
-        return average;
+        
+        return { status: 200, average };
     } catch (error) {
         console.error(error);
-        throw new Error('Error al calcular el promedio de valoraciones del técnico');
+        return { status: 500, message: "Error calculating technician rating average." };
     }
 };
 
-module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate, getUserRatingAverage, getTechnicianRatingAverage};
+module.exports = { getAppointmentsByUserId, addAppointment, getAllTechnicians, updateAppointmentPaid, deleteAppointment, updateAppointment, updateAppointmentRate, getUserRatingAverage, getTechnicianRatingAverage };
