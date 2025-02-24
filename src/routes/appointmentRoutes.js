@@ -10,13 +10,13 @@ router.post('/appointments', authenticateToken, appointmentController.addAppoint
 
 router.get('/appointmentsGetTechnicians', authenticateToken, appointmentController.getTechnicians);
 
-router.patch('/appointments/pay/:id', appointmentController.updateAppointmentPaid);
+router.patch('/appointments/pay/:id', authenticateToken, appointmentController.updateAppointmentPaid);
 
 router.delete('/appointments/:id', authenticateToken, appointmentController.deleteAppointment);
 
 router.patch('/appointments/:id', authenticateToken, appointmentController.updateAppointment);
 
-router.patch('/appointments/rate/:id', appointmentController.updateAppointmentRate);
+router.patch('/appointments/rate/:id', authenticateToken, appointmentController.updateAppointmentRate);
 
 router.get('/appointments/rating/user/:userId', authenticateToken, appointmentController.getUserRatingAverage);
 

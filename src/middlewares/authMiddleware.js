@@ -18,7 +18,7 @@ const authenticateToken = (req, res, next) => {
 
 function isAdmin(req, res, next) {
     if (req.user.type !== "admin") {
-        return res.status(403).json({ message: "Access denied. Admin permissions required." });
+        return res.status(404).json({ message: "Access denied. Admin permissions required." });
     }
     next();
 }

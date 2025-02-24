@@ -4,6 +4,7 @@ const supportMessageController = require("../controllers/SupportMessageControlle
 const { authenticateToken } = require("../middlewares/authMiddleware");
 
 router.get("/supportTicket/:ticketId/messages", authenticateToken, supportMessageController.getMessagesByTicket);
+
 router.post("/supportTicket/:ticketId/messages", authenticateToken, supportMessageController.createMessage);
 
 module.exports = router;
