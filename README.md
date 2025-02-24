@@ -23,6 +23,9 @@ EasyRepair es una plataforma web y móvil que conecta a usuarios con técnicos c
 
 5. **mysql2 (`^3.12.0`)**  
    - Una versión mejorada del paquete `mysql`, con soporte para Promises y mejoras de rendimiento.
+  
+6. **bcryptjs (`^3.0.2`)**
+   - Libreria que se utiliza para cifrar contraseñas de manera segura.
 
 ## **Dependencias de desarrollo (`devDependencies`)**
 
@@ -144,14 +147,37 @@ node src/server.js
     - Llama a `appointmentController.updateAppointment`, pasando el `id` de la cita y los datos a modificar.  
     - Devuelve la cita actualizada o un error en caso de fallo.
 
+ 7. **PATCH `/appointments/rate/:id`**  
+  - **Descripción**: Actualiza la calificación de una cita 
+  - **Funcionamiento**:  
+    - Requiere autenticación (`authenticateToken`).  
+    - Llama a appointmentController.updateAppointmentRate, pasando el id de la cita y la nueva calificación.
+    - Devuelve la cita con la calificación actualizada..
+
+
+8. **GET`/appointments/rating/user/:userId`**  
+  - **Descripción**: Obtiene el promedio de calificación del usuario.
+  - **Funcionamiento**:  
+    - Requiere autenticación (`authenticateToken`).  
+    - Llama a appointmentController.getUserRatingAverage para obtener el promedio de calificación del usuario.
+    - Devuelve el promedio de calificación del usuario.
+   
+9. **GET`/appointments/rating/technician/:technicianId`**  
+  - **Descripción**: Obtiene el promedio de calificación del técnico.
+  - **Funcionamiento**:  
+    - Requiere autenticación (`authenticateToken`).  
+    - Llama a appointmentController.getUserRatingAverage para obtener el promedio de calificación del usuario.
+    - Devuelve el promedio de calificación del usuario.
+
+
 ###  **paymentRoutes**
 
 1. **GET `/payment`**  
   - **Descripción**: Muestra la página de pago (`payment.html`).  
   - **Funcionamiento**:  
-    - Recibe un parámetro de consulta (`id`) que representa el ID de la cita a pagar.  
-    - Si no se proporciona un `id`, responde con un error `400` indicando que el ID es requerido.  
-    - Si el `id` está presente, envía el archivo `payment.html` ubicado en `../views/`.  
+    - Requiere autenticación (authenticateToken). 
+    - Llama a appointmentController.getTechnicianRatingAverage para obtener el promedio de calificación del técnico.
+    - Devuelve el promedio de calificación del técnico. 
 
 ###  **supportTicketRoutes**
 
@@ -211,3 +237,7 @@ node src/server.js
 
 *  [Daniel Santiago Torres Acosta](https://github.com/RulosS290)
 *  [Diego Fernando Castellanos Amaya](https://github.com/Diegoc04)
+
+## Agradecimientos
+
+* Diego Alejandro Jara Arango - Profesor de IETI
