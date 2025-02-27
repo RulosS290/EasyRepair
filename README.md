@@ -225,13 +225,17 @@ node src/server.js
 
 ## Sprint 1
 
-#  Funcionamiento del endpoint
+###  Funcionamiento del endpoint
 
 ![image](https://github.com/user-attachments/assets/029e37fd-9100-41b7-aaab-2413a043ad4a)
 ![image](https://github.com/user-attachments/assets/64a3e002-1a66-4b42-8fb8-12167ce9f42c)
 
-# Video sprint 1
+### Video sprint 1
 [Link](https://youtu.be/48XF7RM1qM8)
+
+## Sprint 2
+
+[Link](https://youtu.be/YQo0EkrHT20)
 
 ## Integrantes
 
