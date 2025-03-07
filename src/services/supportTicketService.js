@@ -1,20 +1,5 @@
 const connection = require('../config/db');
 
-async function createMessage({ ticketId, userId, message }) {
-    try {
-        console.log(`[INFO] Creating message in ticket ${ticketId} by user ${userId}`);
-
-        const query = `INSERT INTO support_messages (id_ticket, sender_id, message) VALUES (?, ?, ?)`;
-        const [result] = await connection.query(query, [ticketId, userId, message]);
-
-        console.log(`[SUCCESS] Message created with ID: ${result.insertId} in ticket ${ticketId}`);
-        return { id: result.insertId, ticketId, userId, message };
-    } catch (error) {
-        console.error(`[ERROR] Failed to insert message in ticket ${ticketId}: ${error.message}`);
-        throw { status: 500, message: "Error sending the message", error };
-    }
-}
-
 async function createSupportTicket({ userId, type, description }) {
     try {
         console.log(`[INFO] Creating ticket for user ID: ${userId} with type: ${type}`);
@@ -81,4 +66,4 @@ async function getSupportTicketsByUser(userId) {
     }
 }
 
-module.exports = { getAllSupportTickets, createSupportTicket, getSupportTicketsByUser, createMessage };
+module.exports = { getAllSupportTickets, createSupportTicket, getSupportTicketsByUser };
