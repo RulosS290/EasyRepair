@@ -9,8 +9,8 @@ const getUserById = async (userId) => {
         );
 
         if (results.length === 0) {
-            console.warn(`Usuario con ID ${userId} no encontrado`);
-            throw { status: 404, message: 'Usuario no encontrado' };
+            console.warn(`[ERROR] User with ID ${userId} not found`);
+            throw { status: 404, message: 'User not found' };
         }
 
         console.log(`[INFO] User found: ${JSON.stringify(results[0])}`);

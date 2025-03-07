@@ -8,7 +8,7 @@ const getAppointmentsByUserId = async (userId) => {
         );
         
         if (appointments.length === 0) {
-            console.warn(`No appointments found for user ${userId}`);
+            console.warn(`[WARNING] No appointments found for user ${userId}`);
             throw { status: 404, message: 'No hay citas encontradas' };
         }
         
@@ -19,7 +19,7 @@ const getAppointmentsByUserId = async (userId) => {
         );
         
         const usersMap = Object.fromEntries(users.map(u => [u.id, u.username]));
-        console.log(`Appointments retrieved successfully for user ${userId}`);
+        console.log(`[INFO] Appointments retrieved successfully for user ${userId}`);
         
         return appointments.map(a => ({
             id: a.id,
@@ -59,7 +59,7 @@ const addAppointment = async (userId, technicianId, datetime, device, cost = 1) 
             [userId, technicianId, datetime, device, cost, 0]
         );
         
-        console.log(`Appointment added successfully with ID ${results.insertId}`);
+        console.log(`[INFO] Appointment added successfully with ID ${results.insertId}`);
         
         return { 
             id: results.insertId, 
@@ -88,7 +88,7 @@ const updateAppointmentPaid = async (appointmentId) => {
             throw { status: 400, message: 'The appointment is already paid or does not exist' };
         }
         
-        console.log(`Payment registered successfully for appointment ${appointmentId}`);
+        console.log(`[INFO] Payment registered successfully for appointment ${appointmentId}`);
         return { status: 200, message: 'Payment successfully recorded' };
     } catch (error) {
         throw error.status ? error : { status: 500, message: 'Error updating payment' };
@@ -97,7 +97,7 @@ const updateAppointmentPaid = async (appointmentId) => {
 
 const updateAppointmentRate = async (appointmentId, rate) => {
     try {
-        console.log(`🔍 Searching for appointment with ID: ${appointmentId}`);
+        console.log(`[INFO] Searching for appointment with ID: ${appointmentId}`);
         const [appointment] = await connection.query(
             `SELECT technician_rate, user_rate FROM appointments WHERE id = ?`,
             [appointmentId]
@@ -117,7 +117,7 @@ const updateAppointmentRate = async (appointmentId, rate) => {
             throw { status: 400, message: 'The appointment has already been fully rated' };
         }
 
-        console.log(`✅ Updating field: ${fieldToUpdate} with value: ${rate}`);
+        console.log(`[INFO] Updating field: ${fieldToUpdate} with value: ${rate}`);
 
         const [results] = await connection.query(
             `UPDATE appointments SET ${fieldToUpdate} = ? WHERE id = ?`,
@@ -128,7 +128,7 @@ const updateAppointmentRate = async (appointmentId, rate) => {
             throw { status: 400, message: 'Failed to update rating' };
         }
 
-        console.log(`✅ Rating successfully recorded for appointment ID: ${appointmentId}`);
+        console.log(`[INFO] Rating successfully recorded for appointment ID: ${appointmentId}`);
         return { status: 200, message: 'Rating successfully recorded' };
     } catch (error) {
         throw error.status ? error : { status: 500, message: 'Error al actualizar la calificación' };
@@ -137,7 +137,7 @@ const updateAppointmentRate = async (appointmentId, rate) => {
 
 const getAllTechnicians = async () => {
     try {
-        console.log(`🔍 Searching for all technicians`);
+        console.log(`[INFO] Searching for all technicians`);
         const [results] = await connection.query(
             `SELECT id, username FROM users WHERE type = 'technical'`
         );
@@ -146,7 +146,7 @@ const getAllTechnicians = async () => {
             throw { status: 404, message: 'No technicians found' };
         }
 
-        console.log(`✅ Found ${results.length} technicians`);
+        console.log(`[INFO] Found ${results.length} technicians`);
         return results;
     } catch (error) {
         throw error.status ? error : { status: 500, message: 'Error retrieving technicians' };
@@ -162,11 +162,11 @@ const deleteAppointment = async (appointmentId) => {
         );
         
         if (results.affectedRows === 0) {
-            console.warn(`Appointment ${appointmentId} not found`);
+            console.warn(`[WARNING] Appointment ${appointmentId} not found`);
             throw { status: 404, message: 'Appointment not found' };
         }
         
-        console.log(`Appointment ${appointmentId} deleted successfully`);
+        console.log(`[SUCCESS] Appointment ${appointmentId} deleted successfully`);
         return { status: 200, message: 'Appointment successfully deleted' };
     } catch (error) {
         throw error.status ? error : { status: 500, message: 'Server error' };

@@ -9,12 +9,12 @@ async function getMessagesByTicket(ticketId, userId, userType) {
         );
 
         if (!ticket || ticket.length === 0) {
-            console.log(`[WARNING] Ticket ${ticketId} not found.`);
+            console.log(`[ERROR] Ticket ${ticketId} not found.`);
             throw new Error("Ticket not found.");            
         }
 
         if (userType !== "admin" && ticket[0].id_user !== userId) {
-            console.log(`[WARNING] User ${userId} does not have permission to view ticket ${ticketId}.`);
+            console.log(`[ERROR] User ${userId} does not have permission to view ticket ${ticketId}.`);
             throw new Error("You do not have permission to view this ticket.");
         }
 
