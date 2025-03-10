@@ -17,14 +17,14 @@ const authenticateToken = (req, res, next) => {
 };
 
 function isAdmin(req, res, next) {
-    if (req.user.type !== "technical") {
+    if (req.user.type !== "admin") {
         return res.status(404).json({ message: "Access denied. Admin permissions required." });
     }
     next();
 }
 
 function isTechnical(req, res, next) {
-    if (req.user.type !== "admin") {
+    if (req.user.type !== "technical") {
         return res.status(404).json({ message: "Access denied. technical permissions required." });
     }
     next();
