@@ -23,4 +23,11 @@ function isAdmin(req, res, next) {
     next();
 }
 
-module.exports = { authenticateToken, isAdmin };
+function isTechnical(req, res, next) {
+    if (req.user.type !== "technical") {
+        return res.status(404).json({ message: "Access denied. technical permissions required." });
+    }
+    next();
+}
+
+module.exports = { authenticateToken, isAdmin, isTechnical };
