@@ -2,67 +2,67 @@ const connection = require('../config/db');
 
 async function createSupportTicket({ userId, type, description }) {
     try {
-        console.log(`[INFO] Creando ticket para usuario ID: ${userId} con tipo: ${type}`);
+        console.log(`[INFO] Creating ticket for user ID: ${userId} with type: ${type}`);
 
         const query = `INSERT INTO support_tickets (id_user, type, description) VALUES (?, ?, ?)`;
         const [results] = await connection.query(query, [userId, type, description]);
 
-        console.log(`[DEBUG] Resultado de la consulta:`, results);
+        console.log(`[DEBUG] Query result:`, results);
 
         if (!results || !results.insertId) {
-            console.error(`[ERROR] No se generó un insertId, posible fallo en la inserción`);
-            throw { status: 500, message: 'No se pudo crear el ticket de soporte' };
+            console.error(`[ERROR] No insertId generated, possible insertion failure.`);
+            throw { status: 500, message: 'Failed to create support ticket' };
         }
 
-        console.log(`[SUCCESS] Ticket creado con ID: ${results.insertId}`);
+        console.log(`[SUCCESS] Ticket created with ID: ${results.insertId}`);
         return { id: results.insertId, userId, type, description, state: true };
     } catch (error) {
-        console.error(`[ERROR] Error al insertar el ticket: ${error.message}`);
-        throw { status: 500, message: 'Error al crear el ticket de soporte', error };
+        console.error(`[ERROR] Error inserting the ticket: ${error.message}`);
+        throw { status: 500, message: 'Failed to create the support ticket', error };
     }
 }
 
 async function getAllSupportTickets() {
     try {
-        console.log(`[INFO] Solicitando todos los tickets de soporte`);
+        console.log(`[INFO] Requesting all support tickets`);
 
         const query = `SELECT id_ticket, id_user, type, state, description, created_at FROM support_tickets`;
         const [results] = await connection.query(query);
 
-        console.log(`[DEBUG] Resultado de la consulta (All Tickets):`, results);
+        console.log(`[DEBUG] Query result (All Tickets):`, results);
 
         if (!results || results.length === 0) {
-            console.warn(`[WARNING] No se encontraron tickets en la base de datos.`);
+            console.warn(`[WARNING] No tickets found in the database.`);
             return [];
         }
 
-        console.log(`[SUCCESS] ${results.length} tickets encontrados`);
+        console.log(`[SUCCESS] ${results.length} tickets found`);
         return results;
     } catch (error) {
-        console.error(`[ERROR] Error al obtener los tickets: ${error.message}`);
-        throw { status: 500, message: 'Error al obtener los tickets de soporte', error };
+        console.error(`[ERROR] Failed to retrieve tickets: ${error.message}`);
+        throw { status: 500, message: 'Error retrieving support tickets', error };
     }
 }
 
 async function getSupportTicketsByUser(userId) {
     try {
-        console.log(`[INFO] Solicitando tickets para el usuario ID: ${userId}`);
+        console.log(`[INFO] Requesting tickets for user ID: ${userId}`);
 
         const query = `SELECT id_ticket, id_user, type, state, description, created_at FROM support_tickets WHERE id_user = ?`;
         const [results] = await connection.query(query, [userId]);
 
-        console.log(`[DEBUG] Resultado de la consulta (User Tickets):`, results);
+        console.log(`[DEBUG] Query result (User Tickets):`, results);
 
         if (!results || results.length === 0) {
-            console.warn(`[WARNING] No se encontraron tickets para el usuario ${userId}.`);
+            console.warn(`[WARNING] No tickets found for user ${userId}.`);
             return [];
         }
 
-        console.log(`[SUCCESS] ${results.length} tickets encontrados para el usuario ${userId}`);
+        console.log(`[SUCCESS] ${results.length} tickets found for user ${userId}.`);
         return results;
     } catch (error) {
-        console.error(`[ERROR] Error al obtener los tickets del usuario ${userId}: ${error.message}`);
-        throw { status: 500, message: 'Error al obtener los tickets del usuario', error };
+        console.error(`[ERROR] Error retrieving tickets for user ${userId}: ${error.message}`);
+        throw { status: 500, message: 'Error retrieving user tickets', error };
     }
 }
 

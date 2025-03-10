@@ -8,6 +8,7 @@ const getAppointmentsByUserId = async (userId) => {
         );
         
         if (appointments.length === 0) {
+            console.warn(`[WARNING] No appointments found for user ${userId}`);
             throw { status: 404, message: 'No hay citas encontradas' };
         }
         
@@ -18,6 +19,7 @@ const getAppointmentsByUserId = async (userId) => {
         );
         
         const usersMap = Object.fromEntries(users.map(u => [u.id, u.username]));
+        console.log(`[INFO] Appointments retrieved successfully for user ${userId}`);
         
         return appointments.map(a => ({
             id: a.id,
@@ -28,14 +30,14 @@ const getAppointmentsByUserId = async (userId) => {
             related_user_name: userId === a.technician_id ? usersMap[a.user_id] : usersMap[a.technician_id]
         }));
     } catch (error) {
-        throw error.status ? error : { status: 500, message: 'Error al obtener las citas' };
+        throw error.status ? error : { status: 500, message: 'Error retrieving appointments' };
     }
 };
 
 const addAppointment = async (userId, technicianId, datetime, device, cost = 1) => {
     try {
         if (!userId || !technicianId || !datetime || !device || !cost) {
-            throw { status: 400, message: 'Faltan datos necesarios para la cita' };
+            throw { status: 400, message: 'Missing required appointment data' };
         }
         
         technicianId = Number(technicianId);
@@ -47,7 +49,7 @@ const addAppointment = async (userId, technicianId, datetime, device, cost = 1) 
         );
         
         if (technicianResults.length === 0) {
-            throw { status: 404, message: 'Técnico no encontrado' };
+            throw { status: 404, message: 'Technician not found' };
         }
         
         const technician = technicianResults[0];
@@ -56,6 +58,8 @@ const addAppointment = async (userId, technicianId, datetime, device, cost = 1) 
             `INSERT INTO appointments (user_id, technician_id, datetime, device, cost, paid) VALUES (?, ?, ?, ?, ?, ?)`,
             [userId, technicianId, datetime, device, cost, 0]
         );
+        
+        console.log(`[INFO] Appointment added successfully with ID ${results.insertId}`);
         
         return { 
             id: results.insertId, 
@@ -80,24 +84,27 @@ const updateAppointmentPaid = async (appointmentId) => {
         );
         
         if (results.affectedRows === 0) {
-            throw { status: 400, message: 'La cita ya está pagada o no existe' };
+            console.warn(`Appointment ${appointmentId} is already paid or does not exist`);
+            throw { status: 400, message: 'The appointment is already paid or does not exist' };
         }
         
-        return { status: 200, message: 'Pago registrado correctamente' };
+        console.log(`[INFO] Payment registered successfully for appointment ${appointmentId}`);
+        return { status: 200, message: 'Payment successfully recorded' };
     } catch (error) {
-        throw error.status ? error : { status: 500, message: 'Error al actualizar el pago' };
+        throw error.status ? error : { status: 500, message: 'Error updating payment' };
     }
 };
 
 const updateAppointmentRate = async (appointmentId, rate) => {
     try {
+        console.log(`[INFO] Searching for appointment with ID: ${appointmentId}`);
         const [appointment] = await connection.query(
             `SELECT technician_rate, user_rate FROM appointments WHERE id = ?`,
             [appointmentId]
         );
 
         if (appointment.length === 0) {
-            throw { status: 400, message: 'La cita no existe' };
+            throw { status: 400, message: 'The appointment does not exist' };
         }
 
         let fieldToUpdate;
@@ -107,8 +114,10 @@ const updateAppointmentRate = async (appointmentId, rate) => {
         } else if (appointment[0].user_rate === null) {
             fieldToUpdate = 'user_rate';
         } else {
-            throw { status: 400, message: 'La cita ya ha sido calificada completamente' };
+            throw { status: 400, message: 'The appointment has already been fully rated' };
         }
+
+        console.log(`[INFO] Updating field: ${fieldToUpdate} with value: ${rate}`);
 
         const [results] = await connection.query(
             `UPDATE appointments SET ${fieldToUpdate} = ? WHERE id = ?`,
@@ -116,10 +125,11 @@ const updateAppointmentRate = async (appointmentId, rate) => {
         );
 
         if (results.affectedRows === 0) {
-            throw { status: 400, message: 'No se pudo actualizar la calificación' };
+            throw { status: 400, message: 'Failed to update rating' };
         }
 
-        return { status: 200, message: 'Calificación registrada correctamente' };
+        console.log(`[INFO] Rating successfully recorded for appointment ID: ${appointmentId}`);
+        return { status: 200, message: 'Rating successfully recorded' };
     } catch (error) {
         throw error.status ? error : { status: 500, message: 'Error al actualizar la calificación' };
     }
@@ -127,19 +137,22 @@ const updateAppointmentRate = async (appointmentId, rate) => {
 
 const getAllTechnicians = async () => {
     try {
+        console.log(`[INFO] Searching for all technicians`);
         const [results] = await connection.query(
             `SELECT id, username FROM users WHERE type = 'technical'`
         );
-        
+
         if (results.length === 0) {
-            throw { status: 404, message: 'No se encontraron técnicos' };
+            throw { status: 404, message: 'No technicians found' };
         }
-        
+
+        console.log(`[INFO] Found ${results.length} technicians`);
         return results;
     } catch (error) {
-        throw error.status ? error : { status: 500, message: 'Error al obtener los técnicos' };
+        throw error.status ? error : { status: 500, message: 'Error retrieving technicians' };
     }
 };
+
 
 const deleteAppointment = async (appointmentId) => {
     try {
@@ -149,12 +162,14 @@ const deleteAppointment = async (appointmentId) => {
         );
         
         if (results.affectedRows === 0) {
-            throw { status: 404, message: 'Cita no encontrada' };
+            console.warn(`[WARNING] Appointment ${appointmentId} not found`);
+            throw { status: 404, message: 'Appointment not found' };
         }
         
-        return { status: 200, message: 'Cita eliminada exitosamente' };
+        console.log(`[SUCCESS] Appointment ${appointmentId} deleted successfully`);
+        return { status: 200, message: 'Appointment successfully deleted' };
     } catch (error) {
-        throw error.status ? error : { status: 500, message: 'Error en el servidor' };
+        throw error.status ? error : { status: 500, message: 'Server error' };
     }
 };
 
@@ -166,12 +181,12 @@ const updateAppointment = async (appointmentId, datetime, device, paid) => {
         );
         
         if (results.affectedRows === 0) {
-            throw { status: 404, message: 'Cita no encontrada' };
+            throw { status: 404, message: 'Appointment not found' };
         }
         
-        return { status: 200, message: 'Cita actualizada correctamente' };
+        return { status: 200, message: 'Appointment updated successfully' };
     } catch (error) {
-        throw error.status ? error : { status: 500, message: 'Error al actualizar la cita' };
+        throw error.status ? error : { status: 500, message: 'Error updating the appointment' };
     }
 };
 
