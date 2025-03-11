@@ -42,11 +42,15 @@ app.get('/user/supportTickets/chat', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'supportChat.html'));
 });
 
+app.get('/payment', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'payment.html'));
+});
+
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api', appointmentRoutes);
 app.use('/api', adminRoutes);
-app.use('/', paymentRoutes);
+app.use('/api', paymentRoutes);
 app.use('/api', supportTickets);
 app.use('/api', supportMessages);
 

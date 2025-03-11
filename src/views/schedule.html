@@ -43,17 +43,51 @@
     <button onclick="goBack()">Volver</button>
 
     <!-- Modal de edición -->
+    <!-- Modal de edición -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <h3>Editar Cita</h3>
+
             <label for="newDatetime">Nueva Fecha y Hora:</label>
             <input type="datetime-local" id="newDatetime"><br><br>
+
             <label for="newDevice">Nuevo Dispositivo:</label>
-            <input type="text" id="newDevice"><br><br>
+            <select id="newDevice">
+                <optgroup label="Laptops">
+                    <option value="Laptop Dell XPS 13">Laptop Dell XPS 13</option>
+                    <option value="MacBook Pro 16">MacBook Pro 16</option>
+                    <option value="Asus ROG Zephyrus G14">Asus ROG Zephyrus G14</option>
+                    <option value="Lenovo ThinkPad X1 Carbon">Lenovo ThinkPad X1 Carbon</option>
+                </optgroup>
+
+                <optgroup label="Celulares">
+                    <option value="iPhone 13 Pro">iPhone 13 Pro</option>
+                    <option value="iPhone 15">iPhone 15</option>
+                    <option value="Samsung Galaxy S23">Samsung Galaxy S23</option>
+                    <option value="Google Pixel 8">Google Pixel 8</option>
+                    <option value="Xiaomi Mi 13">Xiaomi Mi 13</option>
+                </optgroup>
+
+                <optgroup label="Tablets">
+                <option value="Tablet iPad Air">iPad Air</option>
+                <option value="Samsung Galaxy Tab S9">Samsung Galaxy Tab S9</option>
+                <option value="Microsoft Surface Pro 9">Microsoft Surface Pro 9</option>
+            </optgroup>
+        
+            <optgroup label="Electrodomésticos">
+                <option value="Televisor Samsung QLED 65">Televisor Samsung QLED 65"</option>
+                <option value="Refrigerador LG Smart Inverter">Refrigerador LG Smart Inverter</option>
+                <option value="Aspiradora iRobot Roomba">Aspiradora iRobot Roomba</option>
+                <option value="Lavadora Whirlpool 20Kg">Lavadora Whirlpool 20Kg</option>
+                <option value="Horno Microondas Panasonic">Horno Microondas Panasonic</option>
+            </select>
+            <br><br>
+
             <button onclick="saveChanges()">Guardar Cambios</button>
         </div>
     </div>
+
 
     <script>
         let selectedAppointmentId = null;

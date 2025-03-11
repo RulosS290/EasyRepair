@@ -7,7 +7,6 @@ router.get('/payment', (req, res) => {
     if (!appointmentId) {
         return res.status(400).send('[ERROR] Appointment ID not provided');
     }
-    res.sendFile(path.join(__dirname, '../views/payment.html'));
 });
 
 module.exports = router;
