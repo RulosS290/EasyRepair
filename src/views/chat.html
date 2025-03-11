@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat de Cita</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .chat-container { width: 400px; margin: auto; border: 1px solid #ccc; padding: 10px; }
+        .messages { height: 300px; overflow-y: scroll; border-bottom: 1px solid #ccc; padding: 10px; }
+        .message { padding: 5px; border-radius: 5px; margin-bottom: 5px; }
+        .sent { background-color: #d1e7dd; text-align: right; }
+        .received { background-color: #f8d7da; text-align: left; }
+        .input-container { display: flex; margin-top: 10px; }
+        input { flex: 1; padding: 5px; }
+        button { padding: 5px; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chat de la Cita</h2>
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="Escribe tu mensaje...">
+            <button id="sendMessage">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appointmentId = urlParams.get("id");  // Extrae el ID de la cita
+            if (!appointmentId) {
+                alert("Error: No se ha especificado una cita.");
+                return;
+            }
+
+            const token = localStorage.getItem("token");  // Obtener el token de autenticación
+
+            // Cargar mensajes
+            async function loadMessages() {
+                try {
+                    const response = await fetch(`/api/chat/${appointmentId}`, {
+                        headers: { "Authorization": "Bearer " + token }
+                    });
+
+                    if (!response.ok) throw new Error("Error al cargar los mensajes");
+
+                    const messages = await response.json();
+                    const messagesContainer = document.getElementById("messages");
+                    messagesContainer.innerHTML = "";
+
+                    messages.forEach(msg => {
+                        let cssClass = msg.sender_id === 1 ? "sent" : "received";  // Ajustar según el usuario actual
+                        let messageElement = `<div class="message ${cssClass}"><strong>${msg.username}:</strong> ${msg.message}</div>`;
+                        messagesContainer.innerHTML += messageElement;
+                    });
+
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;  // Auto-scroll
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            // Enviar mensaje
+            async function sendMessage() {
+                const message = document.getElementById("messageInput").value.trim();
+                if (!message) return;
+
+                try {
+                    const response = await fetch(`/api/chat/${appointmentId}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        },
+                        body: JSON.stringify({ message })
+                    });
+
+                    if (!response.ok) throw new Error("Error al enviar el mensaje");
+
+                    document.getElementById("messageInput").value = "";
+                    loadMessages();  // Recargar mensajes después de enviar
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            // Asignar evento al botón de envío
+            document.getElementById("sendMessage").addEventListener("click", sendMessage);
+
+            // Cargar mensajes al iniciar
+            loadMessages();
+        });
+    </script>
+</body>
+</html>
