@@ -22,7 +22,6 @@
                 <option value="Asus ROG Zephyrus G14">Asus ROG Zephyrus G14</option>
                 <option value="Lenovo ThinkPad X1 Carbon">Lenovo ThinkPad X1 Carbon</option>
             </optgroup>
-        
             <optgroup label="Celulares">
                 <option value="iPhone 13 Pro">iPhone 13 Pro</option>
                 <option value="iPhone 15">iPhone 15</option>
@@ -30,13 +29,11 @@
                 <option value="Google Pixel 8">Google Pixel 8</option>
                 <option value="Xiaomi Mi 13">Xiaomi Mi 13</option>
             </optgroup>
-        
             <optgroup label="Tablets">
                 <option value="Tablet iPad Air">iPad Air</option>
                 <option value="Samsung Galaxy Tab S9">Samsung Galaxy Tab S9</option>
                 <option value="Microsoft Surface Pro 9">Microsoft Surface Pro 9</option>
             </optgroup>
-        
             <optgroup label="Electrodomésticos">
                 <option value="Televisor Samsung QLED 65">Televisor Samsung QLED 65"</option>
                 <option value="Refrigerador LG Smart Inverter">Refrigerador LG Smart Inverter</option>
@@ -47,8 +44,14 @@
         </select>
         <br><br>
         
-        <label for="datetime">Fecha y Hora:</label>
-        <input type="datetime-local" id="datetime" name="datetime" required>
+        <label for="datetime">Horario disponible del técnico:</label>
+        <select id="datetime" name="datetime" required>
+            <option value="2024-03-11T08:00">08:00 AM</option>
+            <option value="2024-03-11T10:00">10:00 AM</option>
+            <option value="2024-03-11T12:00">12:00 PM</option>
+            <option value="2024-03-11T14:00">02:00 PM</option>
+            <option value="2024-03-11T16:00">04:00 PM</option>
+        </select>
         <br><br>
 
         <button type="submit">Crear Cita</button>
