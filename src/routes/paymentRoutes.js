@@ -7,7 +7,6 @@ router.get('/payment', (req, res) => {
     if (!appointmentId) {
         return res.status(400).send('ID de cita no proporcionado');
     }
-    res.sendFile(path.join(__dirname, '../views/payment.html'));
 });
 
 module.exports = router;

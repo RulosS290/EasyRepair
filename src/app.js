@@ -42,6 +42,10 @@ app.get('/user/supportTickets/chat', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'supportChat.html'));
 });
 
+app.get('/payment', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'payment.html'));
+});
+
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api', appointmentRoutes);
