@@ -21,6 +21,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.15.2",
     "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
