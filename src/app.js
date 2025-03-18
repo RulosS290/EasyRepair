@@ -7,8 +7,18 @@ const adminRoutes = require('./routes/adminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const supportTickets = require('./routes/supportTicketRoutes');
 const supportMessages = require('./routes/supportMessageRoutes');
+const cors = require('cors');
 
 const app = express();
+
+const corsOptions = {
+    origin: ['http://localhost:3000', 'http://localhost:5173/'],
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization',
+    credentials: true
+};
+
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
