@@ -172,6 +172,7 @@
                         <td><button onclick="openModal('${app.id}', '${app.datetime}', '${app.device}')">Editar</button></td>
                         <td><button onclick="deleteAppointment('${app.id}')">Eliminar</button></td>
                         <td>${ratingButton}</td>
+                        <td><button onclick="openChat('${app.id}')">Chat</button></td>
                     `;
                     table.appendChild(row);
                 });
@@ -182,6 +183,10 @@
                 console.error('Error:', error.message);
                 document.getElementById('appointmentsContainer').innerHTML = `<p>${error.message}</p>`;
             });
+        }
+
+        function openChat(appointmentId) {
+            window.location.href = `/chat?id=${appointmentId}`;
         }
 
         function payAppointment(appointmentId) {
