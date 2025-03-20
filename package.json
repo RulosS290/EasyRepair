@@ -2,9 +2,9 @@
   "name": "easyrepair",
   "version": "1.0.0",
   "description": "*  [Daniel Santiago Torres Acosta](https://github.com/RulosS290)\r *  [Diego Fernando Castellanos Amaya](https://github.com/Diegoc04)\r *  [Julian David Triana Roa](https://github.com/juliandtrianar)",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node src/server.js",
     "test": "jest"
   },
   "repository": {
